@@ -3,6 +3,7 @@ import Hero from '../components/Hero'
 import AirlineCards from '../components/AirlineCards'
 import Airliners from '../components/Airliners'
 import Airlinerflight from '../components/AirlinerFlight'
+import FlightsAircrafts from '../components/FlightsAircrafts'
 
 
 const AirlinerPage = () => {
@@ -10,7 +11,7 @@ const AirlinerPage = () => {
     <>
         <Hero title='Airline Management' subtitle='Manage flights and planes for each Airliner' />
         <AirlineCards />
-        <Airliners />
+        <FlightsAircrafts />
     
     </>
   )
