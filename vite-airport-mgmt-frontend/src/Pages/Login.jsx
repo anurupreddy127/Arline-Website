@@ -11,7 +11,35 @@ function Login(){
     }
 
     const add_user_handler = ()=>{
-        console.log(authentication.auth);
+        let len = 0;
+        fetch('http://localhost:8080/api/users').then((data)=>data.json()).then(data=>{len=data.length+10})
+        const postData = {
+            id: len,
+            username: user.toString(),
+            password: pwd.toString(),
+            role: 'PASSENGER',
+        };
+        const options = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData)
+        };
+        fetch('http://localhost:8080/api/users', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
     return (
         <div style={{display: "flex", flexDirection: 'row', minHeight:'100vh'}}>
