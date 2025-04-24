@@ -9,9 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/flights")
@@ -37,9 +38,9 @@ public class FlightController {
     
      @GetMapping
     public Map<String, Object> getAllFlights() {
-        List<Flight> flights = flightService.findAllWithDetails(); //Get all flights
+        List<Flight> flights = flightService.findAllWithDetails(); //gets list of flights
         flights.forEach(flight -> System.out.println("Flight ID: " + flight.getFlightId()));
-        //Transform each flight into a structured map for a JSON response that frontend can easily read
+        //maps each flight to a clean JSON that react can easily read
         List<Map<String, Object>> flightData = flights.stream().map(flight -> {
             Map<String, Object> map = new HashMap<>();
             map.put("flightId", flight.getFlightId());
@@ -48,7 +49,7 @@ public class FlightController {
             map.put("departureTime", flight.getDepartureTime());
             map.put("arrivalTime", flight.getArrivalTime());
             map.put("status", flight.getStatus());
-            //nested map for 
+    
             Map<String, Object> airline = new HashMap<>();
             airline.put("name", flight.getAirlineName());
             map.put("airline", airline);
@@ -59,7 +60,12 @@ public class FlightController {
             map.put("aircraft", aircraft);
     
             return map;
-        }).collect(Collectors.toList()); //returns structured list
+        }).collect(Collectors.toList());
+    
+        Map<String, Object> response = new HashMap<>();
+        response.put("flights", flightData);
+        return response;
+    }
         
     @GetMapping("/{id}")
     public ResponseEntity<Flight> getFlightById(@PathVariable Long id) {
