@@ -27,12 +27,38 @@ public class FlightController {
         return new ResponseEntity<>("Failed to create flight", HttpStatus.BAD_REQUEST);
     }
     
-    @GetMapping
-    public ResponseEntity<List<Flight>> getAllFlights() {
-        List<Flight> flights = flightService.findAllWithDetails();
-        return new ResponseEntity<>(flights, HttpStatus.OK);
-    }
+    // @GetMapping
+    // public ResponseEntity<List<Flight>> getAllFlights() {
+    //     List<Flight> flights = flightService.findAllWithDetails();
+    //     return new ResponseEntity<>(flights, HttpStatus.OK);
+    // }
     
+     @GetMapping
+    public Map<String, Object> getAllFlights() {
+        List<Flight> flights = flightService.findAllWithDetails(); //Get all flights
+        flights.forEach(flight -> System.out.println("Flight ID: " + flight.getFlightId()));
+        //Transform each flight into a structured map for a JSON response that frontend can easily read
+        List<Map<String, Object>> flightData = flights.stream().map(flight -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("flightId", flight.getFlightId());
+            map.put("origin", flight.getOriginAirportName());
+            map.put("destination", flight.getDestinationAirportName());
+            map.put("departureTime", flight.getDepartureTime());
+            map.put("arrivalTime", flight.getArrivalTime());
+            map.put("status", flight.getStatus());
+            //nested map for 
+            Map<String, Object> airline = new HashMap<>();
+            airline.put("name", flight.getAirlineName());
+            map.put("airline", airline);
+    
+            Map<String, Object> aircraft = new HashMap<>();
+            aircraft.put("name", flight.getAircraftName());
+            aircraft.put("type", flight.getAircraftType());
+            map.put("aircraft", aircraft);
+    
+            return map;
+        }).collect(Collectors.toList()); //returns structured list
+        
     @GetMapping("/{id}")
     public ResponseEntity<Flight> getFlightById(@PathVariable Long id) {
         Flight flight = flightService.findByIdWithDetails(id);
