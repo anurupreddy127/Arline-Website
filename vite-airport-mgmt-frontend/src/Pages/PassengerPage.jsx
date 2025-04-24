@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 
 const PassengerPage = () => {
@@ -5,6 +6,7 @@ const PassengerPage = () => {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [availableFlights, setAvailableFlights] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [bookingFlightId, setBookingFlightId] = useState(null);
   const [passengers, setPassengers] = useState([]);
   const [seats, setSeats] = useState([]);
