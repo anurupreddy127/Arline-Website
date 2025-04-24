@@ -90,7 +90,3 @@ const FlightsAircrafts = () => {
 };
 
 export default FlightsAircrafts;
-  );
-};
-
-export default FlightsAircrafts;
