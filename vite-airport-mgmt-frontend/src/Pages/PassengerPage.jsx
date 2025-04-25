@@ -6,9 +6,9 @@ const PassengerPage = () => {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [availableFlights, setAvailableFlights] = useState([]);
-  // eslint-disable-next-line no-unused-vars
   const [bookingFlightId, setBookingFlightId] = useState(null);
   const [selectedFlight, setSelectedFlight] = useState(null);
+  const [bookedTrips, setBookedTrips] = useState([]);
   const [passengers, setPassengers] = useState([]);
   const [seats, setSeats] = useState([]);
   const [selectedPassenger, setSelectedPassenger] = useState("");
@@ -27,34 +27,6 @@ const PassengerPage = () => {
   }, []);
 
   // Fetch passengers on mount
-  useEffect(() => {
-    const fetchLoggedInPassenger = async () => {
-      try {
-        const username = localStorage.getItem("loggedInUser");
-        if (!username) return;
-
-        // Get user by username
-        const userRes = await fetch(
-          `http://localhost:8080/api/users/username/${username}`
-        );
-        const userData = await userRes.json();
-        const userId = userData.id;
-
-        // Get passenger by userId
-        const passengerRes = await fetch(
-          `http://localhost:8080/api/passengers/user/${userId}`
-        );
-        const passengerData = await passengerRes.json();
-
-        setPassengers([passengerData]); // Only one passenger will be set
-      } catch (err) {
-        console.error("Error fetching logged-in passenger:", err);
-      }
-    };
-
-    fetchLoggedInPassenger();
-  }, []);
-
   const [loggedInPassenger, setLoggedInPassenger] = useState(null);
 
   useEffect(() => {
@@ -62,11 +34,23 @@ const PassengerPage = () => {
       fetch(`http://localhost:8080/api/users/username/${loggedInUsername}`)
         .then((res) => res.json())
         .then((userData) => {
-          // Once we have the user ID, fetch the passenger using user_id
           fetch(`http://localhost:8080/api/passengers/user/${userData.id}`)
             .then((res) => res.json())
             .then((passengerData) => {
-              setLoggedInPassenger(passengerData);
+              setLoggedInPassenger(passengerData); // Store full passenger
+              setPassengers([passengerData]); // Populate dropdown if needed
+
+              // Fetch booked tickets for this passenger
+              if (passengerData?.passengerId) {
+                fetch(
+                  `http://localhost:8080/api/tickets/passenger/${passengerData.passengerId}`
+                )
+                  .then((res) => res.json())
+                  .then((tickets) => setBookedTrips(tickets))
+                  .catch((err) =>
+                    console.error("Error fetching booked trips:", err)
+                  );
+              }
             })
             .catch((err) =>
               console.error("Error fetching passenger by user ID:", err)
@@ -221,6 +205,34 @@ const PassengerPage = () => {
           </div>
         </div>
       </div>
+
+      {bookedTrips.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">
+          <h3 className="text-3xl font-semibold mb-4 text-center">
+            Your Trips
+          </h3>
+          <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-100 text-center">
+                <th className="p-3">Flight</th>
+                <th className="p-3">Seat</th>
+                <th className="p-3">Class</th>
+                <th className="p-3">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookedTrips.map((trip) => (
+                <tr key={trip.ticketId} className="border-t text-center">
+                  <td className="p-3">{trip.flightDetails}</td>
+                  <td className="p-3">{trip.seat}</td>
+                  <td className="p-3">{trip.className}</td>
+                  <td className="p-3">${trip.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {availableFlights.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">

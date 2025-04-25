@@ -100,6 +100,22 @@ public class TicketRepository {
         
         return jdbcTemplate.queryForObject(sql, ticketWithDetailsRowMapper, ticketId);
     }
+
+    public List<Ticket> findByPassengerWithDetails(Long passengerId) {
+        String sql = "SELECT t.*, " +
+                "p.name as passenger_name, " +
+                "CONCAT(origin.code, ' to ', dest.code, ' - ', f.departure_time) as flight_details, " +
+                "tc.name as class_name " +
+                "FROM tickets t " +
+                "LEFT JOIN passengers p ON t.passenger_id = p.passenger_id " +
+                "LEFT JOIN flights f ON t.flight_id = f.flight_id " +
+                "LEFT JOIN airports origin ON f.origin_airport_id = origin.airport_id " +
+                "LEFT JOIN airports dest ON f.destination_airport_id = dest.airport_id " +
+                "LEFT JOIN ticket_classes tc ON t.class_id = tc.class_id " +
+                "WHERE t.passenger_id = ?";
+    
+        return jdbcTemplate.query(sql, ticketWithDetailsRowMapper, passengerId);
+    }
     
     // UPDATE
     public int update(Ticket ticket) {

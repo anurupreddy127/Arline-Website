@@ -32,6 +32,10 @@ public class TicketService {
     public int delete(Long id) {
         return ticketRepository.delete(id);
     }
+
+    public List<Ticket> findByPassengerWithDetails(Long passengerId) {
+        return ticketRepository.findByPassengerWithDetails(passengerId);
+    }
     
     public List<Ticket> findByPassenger(Long passengerId) {
         return ticketRepository.findByPassenger(passengerId);
