@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTSAPersonnel } from "../api/api";
+import { getTSAPersonnel } from "../api/tsaAPI";
 
 const TSAPage = () => {
   const [tsaPersonnel, setTSAPersonnel] = useState([]);

@@ -12,20 +12,20 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    //     // Using lambda DSL syntax instead of the method chaining approach
-    //     http
-    //         .csrf(csrf -> csrf.disable())
-    //         .authorizeHttpRequests(auth -> 
-    //             auth
-    //                 .requestMatchers("/api/public/**").permitAll()
-    //                 .anyRequest().authenticated()
-    //         )
-    //         .httpBasic(httpBasic -> {});
+     /*@Bean
+     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+         // Using lambda DSL syntax instead of the method chaining approach
+         http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth ->
+                 auth
+                     .requestMatchers("/api/public/**").permitAll()
+                     .anyRequest().authenticated()
+            )
+             .httpBasic(httpBasic -> {});
         
-    //     return http.build();
-    // }
+         return http.build();
+     }*/
 
     @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

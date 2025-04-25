@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import Card from './card';
 import axios from 'axios';
+import authentication from "../authentication.js";
 
 const AirlineCards = () => {
   const [flightData, setFlightData] = useState({
@@ -71,6 +72,10 @@ const AirlineCards = () => {
   };
 
   const handleAddFlight = async () => {
+    if (authentication.auth !== 'AIRLINE'){
+      alert("Not Authorized");
+      return;
+    }
     try {
       const payload = {
         ...flightData,
@@ -105,6 +110,10 @@ const AirlineCards = () => {
   };
 
   const handleAddAircraft = async () => {
+    if (authentication.auth !== 'AIRLINE'){
+      alert("Not Authorized");
+      return;
+    }
     try {
       await axios.post('http://localhost:8080/api/aircraft', aircraftData);
       alert("Aircraft added successfully!");
