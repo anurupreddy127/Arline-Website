@@ -58,6 +58,16 @@ public class PassengerController {
         }
         return new ResponseEntity<>("Failed to delete passenger", HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping("/user/{userId}")
+public ResponseEntity<Passenger> getPassengerByUserId(@PathVariable Long userId) {
+    try {
+        Passenger passenger = passengerService.findByUserId(userId);
+        return new ResponseEntity<>(passenger, HttpStatus.OK);
+    } catch (Exception e) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+}
     
     @GetMapping("/loyalty/{loyaltyId}")
     public ResponseEntity<List<Passenger>> getPassengersByLoyaltyId(@PathVariable String loyaltyId) {

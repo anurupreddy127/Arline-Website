@@ -7,7 +7,6 @@ public class FlightCrew {
     private Long flightId;
     private Long airlineId;
     
-    // For joined data
     private String flightDetails;
     private String airlineName;
     

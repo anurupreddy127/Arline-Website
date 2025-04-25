@@ -45,14 +45,12 @@ public class FlightCrewRepository {
             return crew;
         }
     };
-    
-    // CREATE
+
     public int create(FlightCrew crew) {
         String sql = "INSERT INTO flight_crew (name, role, flight_id, airline_id) VALUES (?, ?, ?, ?)";
         return jdbcTemplate.update(sql, crew.getName(), crew.getRole(), crew.getFlightId(), crew.getAirlineId());
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<FlightCrew> findAllWithDetails() {
         String sql = "SELECT fc.*, " +
                     "CONCAT(origin.code, ' to ', dest.code, ' - ', f.departure_time) as flight_details, " +
@@ -64,8 +62,7 @@ public class FlightCrewRepository {
                     "LEFT JOIN airlines al ON fc.airline_id = al.airline_id";
         return jdbcTemplate.query(sql, crewWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public FlightCrew findByIdWithDetails(Long crewId) {
         String sql = "SELECT fc.*, " +
                     "CONCAT(origin.code, ' to ', dest.code, ' - ', f.departure_time) as flight_details, " +
@@ -78,33 +75,27 @@ public class FlightCrewRepository {
                     "WHERE fc.crew_id = ?";
         return jdbcTemplate.queryForObject(sql, crewWithDetailsRowMapper, crewId);
     }
-    
-    // UPDATE
+
     public int update(FlightCrew crew) {
         String sql = "UPDATE flight_crew SET name = ?, role = ?, flight_id = ?, airline_id = ? WHERE crew_id = ?";
-        return jdbcTemplate.update(sql, crew.getName(), crew.getRole(), 
-                                 crew.getFlightId(), crew.getAirlineId(), crew.getCrewId());
+        return jdbcTemplate.update(sql, crew.getName(), crew.getRole(), crew.getFlightId(), crew.getAirlineId(), crew.getCrewId());
     }
-    
-    // DELETE
+
     public int delete(Long crewId) {
         String sql = "DELETE FROM flight_crew WHERE crew_id = ?";
         return jdbcTemplate.update(sql, crewId);
     }
-    
-    // FIND BY FLIGHT
+
     public List<FlightCrew> findByFlight(Long flightId) {
         String sql = "SELECT * FROM flight_crew WHERE flight_id = ?";
         return jdbcTemplate.query(sql, crewRowMapper, flightId);
     }
-    
-    // FIND BY AIRLINE
+
     public List<FlightCrew> findByAirline(Long airlineId) {
         String sql = "SELECT * FROM flight_crew WHERE airline_id = ?";
         return jdbcTemplate.query(sql, crewRowMapper, airlineId);
     }
-    
-    // FIND BY ROLE
+
     public List<FlightCrew> findByRole(String role) {
         String sql = "SELECT * FROM flight_crew WHERE role = ?";
         return jdbcTemplate.query(sql, crewRowMapper, role);

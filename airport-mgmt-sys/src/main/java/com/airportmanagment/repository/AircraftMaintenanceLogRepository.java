@@ -47,14 +47,11 @@ public class AircraftMaintenanceLogRepository {
         }
     };
     
-    // CREATE
     public int create(AircraftMaintenanceLog log) {
         String sql = "INSERT INTO aircraft_maintenance_log (aircraft_id, flight_id, maintenance_date, status) VALUES (?, ?, ?, ?)";
-        return jdbcTemplate.update(sql, log.getAircraftId(), log.getFlightId(), 
-                                 log.getMaintenanceDate(), log.getStatus());
+        return jdbcTemplate.update(sql, log.getAircraftId(), log.getFlightId(), log.getMaintenanceDate(), log.getStatus());
     }
     
-    // READ ALL WITH DETAILS
     public List<AircraftMaintenanceLog> findAllWithDetails() {
         String sql = "SELECT aml.*, " +
                     "a.name as aircraft_name, " +
@@ -67,7 +64,6 @@ public class AircraftMaintenanceLogRepository {
         return jdbcTemplate.query(sql, maintenanceLogWithDetailsRowMapper);
     }
     
-    // READ BY ID WITH DETAILS
     public AircraftMaintenanceLog findByIdWithDetails(Long logId) {
         String sql = "SELECT aml.*, " +
                     "a.name as aircraft_name, " +
@@ -80,33 +76,27 @@ public class AircraftMaintenanceLogRepository {
                     "WHERE aml.log_id = ?";
         return jdbcTemplate.queryForObject(sql, maintenanceLogWithDetailsRowMapper, logId);
     }
-    
-    // UPDATE
+
     public int update(AircraftMaintenanceLog log) {
         String sql = "UPDATE aircraft_maintenance_log SET aircraft_id = ?, flight_id = ?, maintenance_date = ?, status = ? WHERE log_id = ?";
-        return jdbcTemplate.update(sql, log.getAircraftId(), log.getFlightId(), 
-                                 log.getMaintenanceDate(), log.getStatus(), log.getLogId());
+        return jdbcTemplate.update(sql, log.getAircraftId(), log.getFlightId(), log.getMaintenanceDate(), log.getStatus(), log.getLogId());
     }
-    
-    // DELETE
+
     public int delete(Long logId) {
         String sql = "DELETE FROM aircraft_maintenance_log WHERE log_id = ?";
         return jdbcTemplate.update(sql, logId);
     }
-    
-    // FIND BY AIRCRAFT
+
     public List<AircraftMaintenanceLog> findByAircraft(Long aircraftId) {
         String sql = "SELECT * FROM aircraft_maintenance_log WHERE aircraft_id = ?";
         return jdbcTemplate.query(sql, maintenanceLogRowMapper, aircraftId);
     }
-    
-    // FIND BY STATUS
+
     public List<AircraftMaintenanceLog> findByStatus(String status) {
         String sql = "SELECT * FROM aircraft_maintenance_log WHERE status = ?";
         return jdbcTemplate.query(sql, maintenanceLogRowMapper, status);
     }
-    
-    // FIND BY DATE RANGE
+
     public List<AircraftMaintenanceLog> findByDateRange(LocalDate startDate, LocalDate endDate) {
         String sql = "SELECT * FROM aircraft_maintenance_log WHERE maintenance_date BETWEEN ? AND ?";
         return jdbcTemplate.query(sql, maintenanceLogRowMapper, startDate, endDate);

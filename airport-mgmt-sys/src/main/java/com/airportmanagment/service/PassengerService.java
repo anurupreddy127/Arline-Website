@@ -16,6 +16,10 @@ public class PassengerService {
     public int create(Passenger passenger) {
         return passengerRepository.create(passenger);
     }
+
+    public int createWithUserId(String name, Long userId) {
+        return passengerRepository.createWithUserId(name, userId);
+    }
     
     public List<Passenger> findAll() {
         return passengerRepository.findAll();
@@ -24,10 +28,15 @@ public class PassengerService {
     public Passenger findById(Long id) {
         return passengerRepository.findById(id);
     }
+
+    public Passenger findByUserId(Long userId) {
+        return passengerRepository.findByUserId(userId);
+    }
     
     public int update(Passenger passenger) {
         return passengerRepository.update(passenger);
     }
+    
     
     public int delete(Long id) {
         return passengerRepository.delete(id);
