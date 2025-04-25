@@ -61,6 +61,24 @@ public class FlightRepository {
         }
     };
 
+    public List<Flight> findByRouteWithDetails(Long originAirportId, Long destinationAirportId) {
+        String sql = "SELECT f.*, " +
+                "origin.name as origin_name, origin.code as origin_code, " +
+                "dest.name as dest_name, dest.code as dest_code, " +
+                "al.name as airline_name, " +
+                "ac.name as aircraft_name, ac.type as aircraft_type " +
+                "FROM flights f " +
+                "LEFT JOIN airports origin ON f.origin_airport_id = origin.airport_id " +
+                "LEFT JOIN airports dest ON f.destination_airport_id = dest.airport_id " +
+                "LEFT JOIN airlines al ON f.airline_id = al.airline_id " +
+                "LEFT JOIN aircraft ac ON f.aircraft_id = ac.aircraft_id " +
+                "WHERE f.origin_airport_id = ? AND f.destination_airport_id = ?";
+        
+        return jdbcTemplate.query(sql, flightWithDetailsRowMapper, originAirportId, destinationAirportId);
+    }
+    
+    // CREATE
+
     public int create(Flight flight) {
         String sql = "INSERT INTO flights (origin_airport_id, destination_airport_id, departure_time, " +
                     "arrival_time, status, airline_id, aircraft_id) VALUES (?, ?, ?, ?, ?, ?, ?)";

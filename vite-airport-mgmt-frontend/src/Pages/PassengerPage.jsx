@@ -8,12 +8,15 @@ const PassengerPage = () => {
   const [availableFlights, setAvailableFlights] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [bookingFlightId, setBookingFlightId] = useState(null);
+  const [selectedFlight, setSelectedFlight] = useState(null);
   const [passengers, setPassengers] = useState([]);
   const [seats, setSeats] = useState([]);
   const [selectedPassenger, setSelectedPassenger] = useState("");
   const [selectedSeat, setSelectedSeat] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+
+  const loggedInUsername = localStorage.getItem("loggedInUser");
 
   // Fetch airport list on mount
   useEffect(() => {
@@ -25,11 +28,53 @@ const PassengerPage = () => {
 
   // Fetch passengers on mount
   useEffect(() => {
-    fetch("http://localhost:8080/api/passengers")
-      .then((res) => res.json())
-      .then((data) => setPassengers(data))
-      .catch((err) => console.error("Error fetching passengers:", err));
+    const fetchLoggedInPassenger = async () => {
+      try {
+        const username = localStorage.getItem("loggedInUser");
+        if (!username) return;
+
+        // Get user by username
+        const userRes = await fetch(
+          `http://localhost:8080/api/users/username/${username}`
+        );
+        const userData = await userRes.json();
+        const userId = userData.id;
+
+        // Get passenger by userId
+        const passengerRes = await fetch(
+          `http://localhost:8080/api/passengers/user/${userId}`
+        );
+        const passengerData = await passengerRes.json();
+
+        setPassengers([passengerData]); // Only one passenger will be set
+      } catch (err) {
+        console.error("Error fetching logged-in passenger:", err);
+      }
+    };
+
+    fetchLoggedInPassenger();
   }, []);
+
+  const [loggedInPassenger, setLoggedInPassenger] = useState(null);
+
+  useEffect(() => {
+    if (loggedInUsername) {
+      fetch(`http://localhost:8080/api/users/username/${loggedInUsername}`)
+        .then((res) => res.json())
+        .then((userData) => {
+          // Once we have the user ID, fetch the passenger using user_id
+          fetch(`http://localhost:8080/api/passengers/user/${userData.id}`)
+            .then((res) => res.json())
+            .then((passengerData) => {
+              setLoggedInPassenger(passengerData);
+            })
+            .catch((err) =>
+              console.error("Error fetching passenger by user ID:", err)
+            );
+        })
+        .catch((err) => console.error("Error fetching user by username:", err));
+    }
+  }, [loggedInUsername]);
 
   // Reset state when flights are updated
   useEffect(() => {
@@ -73,9 +118,13 @@ const PassengerPage = () => {
   };
 
   const handleShowBooking = (flightId) => {
+    const flight = availableFlights.find((f) => f.flightId === flightId);
+    setSelectedFlight(flight); // Save full flight object
     setBookingFlightId(flightId);
     setShowBookingForm(true);
     setBookingSuccess(false);
+
+    setSelectedPassenger(loggedInPassenger?.passengerId || "");
 
     // Fetch available seats
     fetch(`http://localhost:8080/api/tickets/flight/${flightId}/available`)
@@ -84,146 +133,227 @@ const PassengerPage = () => {
       .catch((err) => console.error("Error fetching seats:", err));
   };
 
-  const handleBookTicket = () => {
-    if (!selectedPassenger || !selectedSeat) return;
+  const handleBookTicket = async () => {
+    if (!selectedPassenger || !selectedSeat || !loggedInPassenger?.phone) {
+      alert("Please fill all required fields.");
+      return;
+    }
 
-    fetch(
-      `http://localhost:8080/api/tickets/${selectedSeat}/book?passengerId=${selectedPassenger}`,
-      {
-        method: "POST",
-      }
-    )
-      .then((res) => {
-        if (res.ok) {
-          setBookingSuccess(true);
-          setSelectedPassenger("");
-          setSelectedSeat("");
-        } else {
-          alert("Failed to book ticket.");
+    try {
+      // Step 1: Update passenger details (phone + loyalty ID)
+      await fetch(`http://localhost:8080/api/passengers/${selectedPassenger}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: loggedInPassenger.name,
+          phone: loggedInPassenger.phone,
+          loyaltyId: loggedInPassenger.loyaltyId || null, // handle empty loyalty ID
+        }),
+      });
+
+      // Step 2: Book the ticket
+      const res = await fetch(
+        `http://localhost:8080/api/tickets/${selectedSeat}/book?passengerId=${selectedPassenger}`,
+        {
+          method: "POST",
         }
-      })
-      .catch((err) => console.error("Booking error:", err));
+      );
+
+      if (res.ok) {
+        setBookingSuccess(true);
+        setSelectedPassenger("");
+        setSelectedSeat("");
+      } else {
+        alert("Failed to book ticket.");
+      }
+    } catch (err) {
+      console.error("Booking error:", err);
+      alert("Something went wrong!");
+    }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Search Flights</h2>
-      <div className="flex gap-4 mb-6">
-        <select
-          className="p-2 border border-gray-400"
-          value={origin}
-          onChange={(e) => setOrigin(e.target.value)}
-        >
-          <option value="">Select Origin</option>
-          {airports.map((airport) => (
-            <option key={airport.airportId} value={airport.airportId}>
-              {airport.name}
-            </option>
-          ))}
-        </select>
+    <>
+      <div
+        className="relative bg-cover bg-center h-[450px]"
+        style={{ backgroundImage: "url('/bg.jpg')" }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10 flex items-center justify-center h-full">
+          <div className="bg-white/80 p-7 rounded-lg shadow-md text-center">
+            <h2 className="text-4xl font-bold mb-4">Search Flights</h2>
+            <div className="flex gap-4 justify-center">
+              <select
+                className="p-2 border border-gray-400"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+              >
+                <option value="">Select Origin</option>
+                {airports.map((airport) => (
+                  <option key={airport.airportId} value={airport.airportId}>
+                    {airport.name}
+                  </option>
+                ))}
+              </select>
 
-        <select
-          className="p-2 border border-gray-400"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-        >
-          <option value="">Select Destination</option>
-          {airports.map((airport) => (
-            <option key={airport.airportId} value={airport.airportId}>
-              {airport.name}
-            </option>
-          ))}
-        </select>
+              <select
+                className="p-2 border border-gray-400"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+              >
+                <option value="">Select Destination</option>
+                {airports.map((airport) => (
+                  <option key={airport.airportId} value={airport.airportId}>
+                    {airport.name}
+                  </option>
+                ))}
+              </select>
 
-        <button
-          onClick={handleSearchFlights}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Show Available Flights
-        </button>
+              <button
+                onClick={handleSearchFlights}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Show Available Flights
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {availableFlights.length > 0 && (
-        <>
-          <h3 className="text-xl font-semibold mb-2">Available Flights</h3>
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 text-left">Airline</th>
-              <th className="p-2 text-left">Departure</th>
-              <th className="p-2 text-left">Arrival</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Seats Available</th>
-              <th className="p-2 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {availableFlights.map((flight) => (
-              <tr key={flight.flightId}>
-                <td className="p-2">{flight.airline?.name || "Unknown"}</td>
-                <td className="p-2">{flight.departureTime}</td>
-                <td className="p-2">{flight.arrivalTime}</td>
-                <td className="p-2">{flight.status}</td>
-                <td className="p-2">{flight.availableSeats}</td>
-                <td className="p-2">
-                  <button
-                    onClick={() => handleShowBooking(flight.flightId)}
-                    className="bg-green-600 text-white px-3 py-1 rounded"
-                  >
-                    Book
-                  </button>
-                </td>
+        <div className="max-w-6xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">
+          <h3 className="text-4xl font-semibold mb-4 text-center">
+            Available Flights
+          </h3>
+          <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-100 text-center">
+                <th className="p-3">Airline</th>
+                <th className="p-3">Departure</th>
+                <th className="p-3">Arrival</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Seats Available</th>
+                <th className="p-3">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </>
+            </thead>
+            <tbody>
+              {availableFlights.map((flight) => (
+                <tr key={flight.flightId} className="border-t text-center">
+                  <td className="p-3">{flight.airline?.name || "Unknown"}</td>
+                  <td className="p-3">{flight.departureTime}</td>
+                  <td className="p-3">{flight.arrivalTime}</td>
+                  <td className="p-3">{flight.status}</td>
+                  <td className="p-3">{flight.availableSeats}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() =>
+                        handleShowBooking(flight.flightId, flight.airline?.name)
+                      }
+                      className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition"
+                    >
+                      Book
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {showBookingForm && (
-        <div className="bg-gray-100 p-4 rounded shadow-md">
-          <h3 className="text-lg font-semibold mb-2">Book Ticket</h3>
-          <div className="flex gap-4 mb-4">
-            <select
-              className="p-2 border border-gray-400"
-              value={selectedPassenger}
-              onChange={(e) => setSelectedPassenger(e.target.value)}
-            >
-              <option value="">Select Passenger</option>
-              {passengers.map((p) => (
-                <option key={p.passengerId} value={p.passengerId}>
-                  {p.name} ({p.passengerId})
-                </option>
-              ))}
-            </select>
+        <div className="max-w-3xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">
+          <h3 className="text-2xl font-semibold mb-6 text-center">
+            Book Ticket{" "}
+            {selectedFlight?.airline?.name
+              ? `: ${selectedFlight.airline.name}`
+              : ""}
+          </h3>
 
-            <select
-              className="p-2 border border-gray-400"
-              value={selectedSeat}
-              onChange={(e) => setSelectedSeat(e.target.value)}
-            >
-              <option value="">Select Seat</option>
-              {seats.map((seat) => (
-                <option key={seat.ticketId} value={seat.ticketId}>
-                  {seat.seat} - ${seat.price}
-                </option>
-              ))}
-            </select>
+          <div className="space-y-6">
+            <div>
+              <label className="block mb-1 font-medium">Passenger:</label>
+              <select
+                className="p-2 border border-gray-400 w-full rounded"
+                value={selectedPassenger}
+                disabled
+              >
+                {loggedInPassenger && (
+                  <option value={loggedInPassenger.passengerId}>
+                    {loggedInPassenger.name}
+                  </option>
+                )}
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium">Phone Number:</label>
+              <input
+                type="text"
+                className="p-2 border border-gray-400 w-full rounded"
+                value={loggedInPassenger?.phone || ""}
+                onChange={(e) =>
+                  setLoggedInPassenger((prev) => ({
+                    ...prev,
+                    phone: e.target.value,
+                  }))
+                }
+                placeholder="Enter phone number"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium">
+                Loyalty ID (optional):
+              </label>
+              <input
+                type="text"
+                className="p-2 border border-gray-400 w-full rounded"
+                value={loggedInPassenger?.loyaltyId || ""}
+                onChange={(e) =>
+                  setLoggedInPassenger((prev) => ({
+                    ...prev,
+                    loyaltyId: e.target.value,
+                  }))
+                }
+                placeholder="Enter Loyalty ID"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium">Select Seat:</label>
+              <select
+                className="p-2 border border-gray-400 w-full rounded"
+                value={selectedSeat}
+                onChange={(e) => setSelectedSeat(e.target.value)}
+              >
+                <option value="">Select Seat</option>
+                {seats.map((seat) => (
+                  <option key={seat.ticketId} value={seat.ticketId}>
+                    {seat.seat} - ${seat.price}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <button
               onClick={handleBookTicket}
-              className="bg-purple-600 text-white px-4 py-2 rounded"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded shadow"
             >
               Confirm Booking
             </button>
-          </div>
 
-          {bookingSuccess && (
-            <p className="text-green-600 font-semibold">
-              Ticket booked successfully!
-            </p>
-          )}
+            {bookingSuccess && (
+              <p className="text-green-600 font-semibold text-center">
+                Ticket booked successfully!
+              </p>
+            )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
