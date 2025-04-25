@@ -6,7 +6,6 @@ public class AirportStaff {
     private String role;
     private Long terminalId;
     
-    // For joined data
     private String terminalName;
     
     public AirportStaff() {

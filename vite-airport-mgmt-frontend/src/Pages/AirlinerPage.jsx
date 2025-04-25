@@ -14,6 +14,9 @@ const AirlinerPage = () => {
         <AirlineCards />
         <AirlineAssignments/>
         <FlightsAircrafts />
+        <EditFlights />
+        <EditCrew />
+        <EditMaintenanceLog />
     
     </>
   )

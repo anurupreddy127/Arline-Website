@@ -53,8 +53,7 @@ public class TicketRepository {
             return ticket;
         }
     };
-    
-    // CREATE
+
     public int create(Ticket ticket) {
         String sql = "INSERT INTO tickets (seat, price, booked_status, passenger_id, flight_id, class_id) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
@@ -67,8 +66,7 @@ public class TicketRepository {
             ticket.getClassId()
         );
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<Ticket> findAllWithDetails() {
         String sql = "SELECT t.*, " +
                     "p.name as passenger_name, " +
@@ -83,8 +81,7 @@ public class TicketRepository {
         
         return jdbcTemplate.query(sql, ticketWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public Ticket findByIdWithDetails(Long ticketId) {
         String sql = "SELECT t.*, " +
                     "p.name as passenger_name, " +
@@ -100,6 +97,7 @@ public class TicketRepository {
         
         return jdbcTemplate.queryForObject(sql, ticketWithDetailsRowMapper, ticketId);
     }
+
 
     public List<Ticket> findByPassengerWithDetails(Long passengerId) {
         String sql = "SELECT t.*, " +
@@ -118,6 +116,7 @@ public class TicketRepository {
     }
     
     // UPDATE
+
     public int update(Ticket ticket) {
         String sql = "UPDATE tickets SET seat = ?, price = ?, booked_status = ?, " +
                     "passenger_id = ?, flight_id = ?, class_id = ? WHERE ticket_id = ?";
@@ -131,32 +130,27 @@ public class TicketRepository {
             ticket.getTicketId()
         );
     }
-    
-    // DELETE
+
     public int delete(Long ticketId) {
         String sql = "DELETE FROM tickets WHERE ticket_id = ?";
         return jdbcTemplate.update(sql, ticketId);
     }
-    
-    // FIND BY PASSENGER
+
     public List<Ticket> findByPassenger(Long passengerId) {
         String sql = "SELECT * FROM tickets WHERE passenger_id = ?";
         return jdbcTemplate.query(sql, ticketRowMapper, passengerId);
     }
-    
-    // FIND BY FLIGHT
+
     public List<Ticket> findByFlight(Long flightId) {
         String sql = "SELECT * FROM tickets WHERE flight_id = ?";
         return jdbcTemplate.query(sql, ticketRowMapper, flightId);
     }
-    
-    // FIND AVAILABLE TICKETS BY FLIGHT
+
     public List<Ticket> findAvailableByFlight(Long flightId) {
         String sql = "SELECT * FROM tickets WHERE flight_id = ? AND booked_status = false";
         return jdbcTemplate.query(sql, ticketRowMapper, flightId);
     }
-    
-    // BOOK TICKET
+
     public int bookTicket(Long ticketId, Long passengerId) {
         String sql = "UPDATE tickets SET booked_status = true, passenger_id = ? WHERE ticket_id = ? AND booked_status = false";
         return jdbcTemplate.update(sql, passengerId, ticketId);

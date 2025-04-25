@@ -8,7 +8,6 @@ public class Payments {
     private Boolean paidStatus;
     private Long ticketId;
     
-    // For joined data
     private String ticketDetails;
     private String passengerName;
     private Double ticketPrice;

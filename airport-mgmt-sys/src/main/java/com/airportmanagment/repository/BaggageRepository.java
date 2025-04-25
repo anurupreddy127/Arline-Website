@@ -45,15 +45,12 @@ public class BaggageRepository {
             return baggage;
         }
     };
-    
-    // CREATE
+
     public int create(Baggage baggage) {
         String sql = "INSERT INTO baggage (location, status, passenger_id, flight_id) VALUES (?, ?, ?, ?)";
-        return jdbcTemplate.update(sql, baggage.getLocation(), baggage.getStatus(), 
-                                 baggage.getPassengerId(), baggage.getFlightId());
+        return jdbcTemplate.update(sql, baggage.getLocation(), baggage.getStatus(), baggage.getPassengerId(), baggage.getFlightId());
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<Baggage> findAllWithDetails() {
         String sql = "SELECT b.*, " +
                     "p.name as passenger_name, " +
@@ -65,8 +62,7 @@ public class BaggageRepository {
                     "LEFT JOIN airports dest ON f.destination_airport_id = dest.airport_id";
         return jdbcTemplate.query(sql, baggageWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public Baggage findByIdWithDetails(Long baggageId) {
         String sql = "SELECT b.*, " +
                     "p.name as passenger_name, " +
@@ -79,12 +75,10 @@ public class BaggageRepository {
                     "WHERE b.baggage_id = ?";
         return jdbcTemplate.queryForObject(sql, baggageWithDetailsRowMapper, baggageId);
     }
-    
-    // UPDATE
+
     public int update(Baggage baggage) {
         String sql = "UPDATE baggage SET location = ?, status = ?, passenger_id = ?, flight_id = ? WHERE baggage_id = ?";
-        return jdbcTemplate.update(sql, baggage.getLocation(), baggage.getStatus(), 
-                                 baggage.getPassengerId(), baggage.getFlightId(), baggage.getBaggageId());
+        return jdbcTemplate.update(sql, baggage.getLocation(), baggage.getStatus(), baggage.getPassengerId(), baggage.getFlightId(), baggage.getBaggageId());
     }
     
     // DELETE

@@ -9,7 +9,7 @@ public class AircraftMaintenanceLog {
     private LocalDate maintenanceDate;
     private String status;
     
-    // For joined data
+
     private String aircraftName;
     private String flightDetails;
     

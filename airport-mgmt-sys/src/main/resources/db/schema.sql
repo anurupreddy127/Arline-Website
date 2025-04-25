@@ -17,10 +17,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS ticket_classes;
 DROP TABLE IF EXISTS airports;
 
-
--- Create tables based on the ER diagram
-
--- Users table for authentication
+-- Table for authentication
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
@@ -28,20 +25,20 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL
 );
 
--- Airlines table
+-- Table for airlines
 CREATE TABLE airlines (
     airline_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL
 );
 
--- Terminals table
+-- Table for Terminals
 CREATE TABLE terminals (
     terminal_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     location VARCHAR(100) NOT NULL
 );
 
--- Lounges table
+-- Table for lounges
 CREATE TABLE lounges (
     lounge_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     location VARCHAR(100) NOT NULL,
@@ -50,7 +47,7 @@ CREATE TABLE lounges (
     FOREIGN KEY (terminal_id) REFERENCES terminals(terminal_id)
 );
 
--- Airport Staff table
+-- Table for airport staff, not flight crew or TSA
 CREATE TABLE airport_staff (
     staff_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -59,7 +56,7 @@ CREATE TABLE airport_staff (
     FOREIGN KEY (terminal_id) REFERENCES terminals(terminal_id)
 );
 
--- TSA table
+-- Table for TSA employees
 CREATE TABLE tsa (
     personal_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -69,7 +66,7 @@ CREATE TABLE tsa (
     FOREIGN KEY (terminal_id) REFERENCES terminals(terminal_id)
 );
 
--- Passengers table
+-- Table for passengers
 CREATE TABLE passengers (
     passenger_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -77,7 +74,7 @@ CREATE TABLE passengers (
     loyalty_id VARCHAR(50)
 );
 
--- Aircraft table
+-- Table for aircraft
 CREATE TABLE aircraft (
     aircraft_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
@@ -87,15 +84,16 @@ CREATE TABLE aircraft (
     FOREIGN KEY (airline_id) REFERENCES airlines(airline_id)
 );
 
+-- Table for airports
 CREATE TABLE airports (
     airport_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     city VARCHAR(100),
     country VARCHAR(100),
-    code VARCHAR(10) UNIQUE -- e.g., DFW, LAX
+    code VARCHAR(10) UNIQUE 
 );
 
--- Flights table
+-- Table for Flights 
 CREATE TABLE flights (
     flight_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     origin_airport_id BIGINT,
@@ -111,7 +109,7 @@ CREATE TABLE flights (
     FOREIGN KEY (destination_airport_id) REFERENCES airports(airport_id)
 );
 
--- Flight Crew table
+-- Table for flight crew, such as pilots and flight attendants
 CREATE TABLE flight_crew (
     crew_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -122,7 +120,7 @@ CREATE TABLE flight_crew (
     FOREIGN KEY (airline_id) REFERENCES airlines(airline_id)
 );
 
--- Aircraft Maintenance Log table
+-- Table for Aircraft Maintenance Log
 CREATE TABLE aircraft_maintenance_log (
     log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     aircraft_id BIGINT,
@@ -133,13 +131,14 @@ CREATE TABLE aircraft_maintenance_log (
     FOREIGN KEY (flight_id) REFERENCES flights(flight_id)
 );
 
+-- Table for ticket classes
 CREATE TABLE ticket_classes (
     class_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50), -- First, Business, Economy
     benefits TEXT
 );
 
--- Tickets table
+-- Table for Tickets
 CREATE TABLE tickets (
     ticket_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     seat VARCHAR(10) NOT NULL,
@@ -153,7 +152,7 @@ CREATE TABLE tickets (
     FOREIGN KEY (flight_id) REFERENCES flights(flight_id)
 );
 
--- Baggage table
+-- Table for baggage
 CREATE TABLE baggage (
     baggage_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     location VARCHAR(100),
@@ -164,7 +163,7 @@ CREATE TABLE baggage (
     FOREIGN KEY (flight_id) REFERENCES flights(flight_id)
 );
 
--- Dependents table
+-- Table for dependents, such as children or family members of passengers
 CREATE TABLE dependents (
     dependent_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -176,7 +175,7 @@ CREATE TABLE dependents (
     FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id)
 );
 
--- Payments table
+-- Table for payments
 CREATE TABLE payments (
     payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     date DATE NOT NULL,
@@ -185,22 +184,20 @@ CREATE TABLE payments (
     FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id)
 );
 
--- Insert initial data for terminals
+-- Intial Data for the projet 
+
 INSERT INTO terminals (name, location) VALUES 
     ('Terminal A', 'North Wing'),
     ('Terminal B', 'South Wing');
 
--- Insert initial data for airlines
 INSERT INTO airlines (name) VALUES 
     ('SkyHigh Airlines'),
     ('Global Airways');
 
--- Insert lounges (one per terminal)
 INSERT INTO lounges (location, loyalty_id, terminal_id) VALUES 
     ('Terminal A - Level 3', 'GOLD', 1),
     ('Terminal B - Level 2', 'GOLD', 2);
 
--- Insert airports
 INSERT INTO airports (name, city, country, code) VALUES
 ('DFW International', 'Dallas', 'USA', 'DFW'),
 ('LAX International', 'Los Angeles', 'USA', 'LAX'),
@@ -208,22 +205,20 @@ INSERT INTO airports (name, city, country, code) VALUES
 ('ORD International', 'Chicago', 'USA', 'ORD'),
 ('ATL International', 'Atlanta', 'USA', 'ATL');
 
--- Insert ticket classes
 INSERT INTO ticket_classes (name, benefits) VALUES
 ('Economy', 'Standard seating, 1 carry-on'),
 ('Business', 'Premium seating, 2 carry-ons, priority boarding'),
 ('First Class', 'Luxury seating, lounge access, priority everything');
 
--- Insert users for authentication
-INSERT INTO users (username, password, role) VALUES
-('admin', '$2a$10$X7L4FxfZ1J4RX1XZLP.YY.jmvxEg5Q5WdO7.3ZoFiYwI7g9KGi3.q', 'ADMIN'),
-('passenger1', '$2a$10$kMmUQR.jEWYDGXK1L1APhe8.CrdHBjlq0j6EbQZ0wOe8tL8ueVxuy', 'PASSENGER'),
-('crewmember1', '$2a$10$H5wvnDS9rXmKF6dn3PPjQuLrJuIxHYLXPZtB9hsOdI1d4JQKhKm72', 'CREW'),
-('tsa1', '$2a$10$8LGAh.zYg8oE5GCXBexPEOY7gS/a0D3J9YqJfCxKiMM1zUszPP1pa', 'TSA'),
-('airline1', '$2a$10$PCRnBJWFEduVe9L.V4dF6eQfJlTpx7l7XuGXh1chGfD44rUr76G6i', 'AIRLINE'),
-('staff1', '$2a$10$WvXYDgPQP.x.gVJIJJ7SjeCXCGUZlDy5paF5Nl29NSzfR3NYAkjJC', 'STAFF');
 
--- Insert aircraft
+INSERT INTO users (username, password, role) VALUES
+('admin', 'password', 'ADMIN'),
+('passenger1', 'password', 'PASSENGER'),
+('crew1', 'password', 'CREW'),
+('tsa1', 'password', 'TSA'),
+('airline1', 'password', 'AIRLINE'),
+('staff1', 'password', 'STAFF');
+
 INSERT INTO aircraft (name, type, capacity, airline_id) VALUES
 ('Boeing 737-800', 'Narrow-body', 162, 1),
 ('Airbus A320', 'Narrow-body', 150, 1),
@@ -232,7 +227,7 @@ INSERT INTO aircraft (name, type, capacity, airline_id) VALUES
 ('Bombardier CRJ-900', 'Regional', 76, 1),
 ('Embraer E175', 'Regional', 76, 2);
 
--- Insert flights (departing every hour, arriving every 1.5 hours)
+-- (departing every hour, arriving every 1.5 hours)
 INSERT INTO flights (origin_airport_id, destination_airport_id, departure_time, arrival_time, status, airline_id, aircraft_id) VALUES
 -- SkyHigh Airlines flights
 (1, 2, '2025-04-22 08:00:00', '2025-04-22 10:30:00', 'ON TIME', 1, 1),
@@ -251,7 +246,6 @@ INSERT INTO flights (origin_airport_id, destination_airport_id, departure_time, 
 (4, 1, '2025-04-22 10:00:00', '2025-04-22 11:45:00', 'LANDED', 2, 3),
 (5, 1, '2025-04-22 11:30:00', '2025-04-22 15:00:00', 'LANDED', 2, 4);
 
--- Insert passengers
 INSERT INTO passengers (name, phone, loyalty_id) VALUES
 ('John Smith', '214-555-1234', 'SKY123456'),
 ('Jane Doe', '214-555-5678', 'SKY234567'),
@@ -264,30 +258,26 @@ INSERT INTO passengers (name, phone, loyalty_id) VALUES
 ('Elizabeth Taylor', '214-555-4567', NULL),
 ('David Anderson', '214-555-8901', 'SKY456789');
 
--- Insert tickets
+
 INSERT INTO tickets (seat, price, booked_status, passenger_id, flight_id, class_id) VALUES
 -- Flight 1 tickets
 ('12A', 299.99, TRUE, 1, 1, 1),
 ('12B', 299.99, TRUE, 2, 1, 1),
 ('1A', 899.99, TRUE, 3, 1, 3),
 ('5C', 599.99, TRUE, 4, 1, 2),
--- Flight 2 tickets
 ('14D', 349.99, TRUE, 5, 2, 1),
 ('14E', 349.99, TRUE, 6, 2, 1),
 ('2A', 949.99, TRUE, 7, 2, 3),
 ('7C', 649.99, TRUE, 8, 2, 2),
--- Flight 3 tickets
 ('18F', 279.99, TRUE, 9, 3, 1),
 ('18E', 279.99, TRUE, 10, 3, 1),
--- Flight 5 tickets
 ('10A', 319.99, TRUE, 1, 5, 1),
 ('10B', 319.99, TRUE, 2, 5, 1);
 
--- Insert baggage
+
 INSERT INTO baggage (location, status, passenger_id, flight_id) VALUES
 ('Terminal A - Belt 1', 'CHECKED_IN', 1, 1),
-('Terminal A - Belt 1', 'CHECKED_IN', 1, 1), -- John has 2 bags
-('Terminal A - Belt 1', 'CHECKED_IN', 2, 1),
+('Terminal A - Belt 1', 'CHECKED_IN', 1, 1), 
 ('Aircraft Cargo Hold', 'IN_TRANSIT', 3, 1),
 ('Terminal A - Belt 1', 'CHECKED_IN', 4, 1),
 ('Terminal A - Belt 1', 'CHECKED_IN', 5, 2),
@@ -299,14 +289,12 @@ INSERT INTO baggage (location, status, passenger_id, flight_id) VALUES
 ('Terminal A - Belt 1', 'CHECKED_IN', 1, 5),
 ('Terminal A - Belt 1', 'CHECKED_IN', 2, 5);
 
--- Insert dependents
 INSERT INTO dependents (name, phone, loyalty_id, passenger_id, ticket_id) VALUES
 ('Billy Smith', NULL, 'SKY123457', 1, 1),
 ('Sarah Doe', NULL, 'SKY234568', 2, 2),
 ('Tommy Johnson', NULL, NULL, 3, 3),
 ('Emma Williams', NULL, NULL, 4, 4);
 
--- Insert payments
 INSERT INTO payments (date, paid_status, ticket_id) VALUES
 ('2025-04-10', TRUE, 1),
 ('2025-04-10', TRUE, 2),
@@ -321,7 +309,6 @@ INSERT INTO payments (date, paid_status, ticket_id) VALUES
 ('2025-04-15', TRUE, 11),
 ('2025-04-15', TRUE, 12);
 
--- Insert flight crew (4 crew members and 2 pilots per flight)
 INSERT INTO flight_crew (name, role, flight_id, airline_id) VALUES
 -- Flight 1 crew (SkyHigh Airlines)
 ('Captain James Wilson', 'PILOT', 1, 1),
@@ -345,7 +332,6 @@ INSERT INTO flight_crew (name, role, flight_id, airline_id) VALUES
 ('Christopher Hall', 'FLIGHT_ATTENDANT', 5, 2),
 ('Margaret Young', 'FLIGHT_ATTENDANT', 5, 2);
 
--- Insert aircraft maintenance log
 INSERT INTO aircraft_maintenance_log (aircraft_id, flight_id, maintenance_date, status) VALUES
 (1, 1, '2025-04-21', 'DONE'),
 (2, 2, '2025-04-21', 'DONE'),
@@ -354,7 +340,6 @@ INSERT INTO aircraft_maintenance_log (aircraft_id, flight_id, maintenance_date, 
 (3, 5, '2025-04-21', 'DONE'),
 (4, 6, '2025-04-21', 'DONE');
 
--- Insert TSA staff (2 checkpoints per terminal as per requirements)
 INSERT INTO tsa (name, clearance_level, checkpoint_number, terminal_id) VALUES
 ('Officer John Davis', 'LEVEL_2', 1, 1),
 ('Officer Mary Johnson', 'LEVEL_1', 1, 1),
@@ -365,7 +350,6 @@ INSERT INTO tsa (name, clearance_level, checkpoint_number, terminal_id) VALUES
 ('Officer Thomas Rodriguez', 'LEVEL_3', 2, 2),
 ('Officer Jennifer Lopez', 'LEVEL_2', 2, 2);
 
--- Insert airport staff
 INSERT INTO airport_staff (name, role, terminal_id) VALUES
 ('Michael Clark', 'GATE_AGENT', 1),
 ('Susan Wright', 'GATE_AGENT', 1),

@@ -6,7 +6,6 @@ public class Lounge {
     private String loyaltyId;
     private Long terminalId;
     
-    // For joined data
     private String terminalName;
     
     public Lounge() {

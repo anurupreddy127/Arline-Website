@@ -14,8 +14,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Allow React development server
-        config.addAllowedOrigin("http://localhost:5173"); // Vite default port
+        config.addAllowedOrigin("http://localhost:5173"); 
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
