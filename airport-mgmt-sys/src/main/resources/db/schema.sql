@@ -218,6 +218,7 @@ INSERT INTO users (username, password, role) VALUES
 ('tsa1', 'password', 'TSA'),
 ('airline1', 'password', 'AIRLINE'),
 ('staff1', 'password', 'STAFF');
+('airline2', 'pass', 'AIRLINE');
 
 INSERT INTO aircraft (name, type, capacity, airline_id) VALUES
 ('Boeing 737-800', 'Narrow-body', 162, 1),

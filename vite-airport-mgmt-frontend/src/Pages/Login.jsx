@@ -13,9 +13,9 @@ function Login(){
 
     const add_user_handler = ()=>{
         let len = 0;
-        fetch('http://localhost:8080/api/users').then((data)=>data.json()).then(data=>{len=data.length+1})
+        //fetch('http://localhost:8080/api/users').then((data)=>data.json()).then(data=>{len=data.length+1})
         const postData = {
-            id: len,
+            //id: len,
             username: user.toString(),
             password: pwd.toString(),
             role: 'PASSENGER',
