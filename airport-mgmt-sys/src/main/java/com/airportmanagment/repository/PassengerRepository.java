@@ -30,38 +30,31 @@ public class PassengerRepository {
         }
     };
     
-    // CREATE
     public int create(Passenger passenger) {
         String sql = "INSERT INTO passengers (name, phone, loyalty_id) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, passenger.getName(), passenger.getPhone(), passenger.getLoyaltyId());
     }
     
-    // READ ALL
     public List<Passenger> findAll() {
         String sql = "SELECT * FROM passengers";
         return jdbcTemplate.query(sql, passengerRowMapper);
     }
     
-    // READ BY ID
     public Passenger findById(Long id) {
         String sql = "SELECT * FROM passengers WHERE passenger_id = ?";
         return jdbcTemplate.queryForObject(sql, passengerRowMapper, id);
     }
-    
-    // UPDATE
+
     public int update(Passenger passenger) {
         String sql = "UPDATE passengers SET name = ?, phone = ?, loyalty_id = ? WHERE passenger_id = ?";
-        return jdbcTemplate.update(sql, passenger.getName(), passenger.getPhone(), 
-                                 passenger.getLoyaltyId(), passenger.getPassengerId());
+        return jdbcTemplate.update(sql, passenger.getName(), passenger.getPhone(), passenger.getLoyaltyId(), passenger.getPassengerId());
     }
-    
-    // DELETE
+
     public int delete(Long id) {
         String sql = "DELETE FROM passengers WHERE passenger_id = ?";
         return jdbcTemplate.update(sql, id);
     }
-    
-    // FIND BY LOYALTY ID
+
     public List<Passenger> findByLoyaltyId(String loyaltyId) {
         String sql = "SELECT * FROM passengers WHERE loyalty_id = ?";
         return jdbcTemplate.query(sql, passengerRowMapper, loyaltyId);

@@ -9,9 +9,8 @@ public class Ticket {
     private Boolean bookedStatus;
     private Long passengerId;
     private Long flightId;
-    private Long classId;  // This is the correct field name
+    private Long classId; 
     
-    // Additional fields for joined data
     private String passengerName;
     private String flightDetails;
     private String className;

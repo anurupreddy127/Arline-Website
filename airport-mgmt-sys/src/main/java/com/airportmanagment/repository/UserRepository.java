@@ -30,44 +30,37 @@ public class UserRepository {
             return user;
         }
     };
-    
-    // CREATE
+
     public int create(User user) {
         String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), user.getRole());
     }
-    
-    // READ ALL
+
     public List<User> findAll() {
         String sql = "SELECT * FROM users";
         return jdbcTemplate.query(sql, userRowMapper);
     }
-    
-    // READ BY ID
+
     public User findById(Long id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, userRowMapper, id);
     }
-    
-    // READ BY USERNAME
+
     public User findByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         return jdbcTemplate.queryForObject(sql, userRowMapper, username);
     }
-    
-    // UPDATE
+
     public int update(User user) {
         String sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?";
         return jdbcTemplate.update(sql, user.getUsername(), user.getPassword(), user.getRole(), user.getId());
     }
-    
-    // DELETE
+
     public int delete(Long id) {
         String sql = "DELETE FROM users WHERE id = ?";
         return jdbcTemplate.update(sql, id);
     }
-    
-    // FIND BY ROLE
+
     public List<User> findByRole(String role) {
         String sql = "SELECT * FROM users WHERE role = ?";
         return jdbcTemplate.query(sql, userRowMapper, role);

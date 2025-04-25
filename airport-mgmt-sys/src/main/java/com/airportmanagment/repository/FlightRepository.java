@@ -60,13 +60,12 @@ public class FlightRepository {
             return flight;
         }
     };
-    
-    // CREATE
+
     public int create(Flight flight) {
         String sql = "INSERT INTO flights (origin_airport_id, destination_airport_id, departure_time, " +
                     "arrival_time, status, airline_id, aircraft_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        return jdbcTemplate.update(sql, 
-            flight.getOriginAirportId(), 
+        return jdbcTemplate.update(sql,
+            flight.getOriginAirportId(),
             flight.getDestinationAirportId(),
             flight.getDepartureTime(),
             flight.getArrivalTime(),
@@ -75,8 +74,7 @@ public class FlightRepository {
             flight.getAircraftId()
         );
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<Flight> findAllWithDetails() {
         String sql = "SELECT f.*, " +
                     "origin.name as origin_name, origin.code as origin_code, " +
@@ -91,8 +89,7 @@ public class FlightRepository {
         
         return jdbcTemplate.query(sql, flightWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public Flight findByIdWithDetails(Long flightId) {
         String sql = "SELECT f.*, " +
                     "origin.name as origin_name, origin.code as origin_code, " +
@@ -108,8 +105,7 @@ public class FlightRepository {
         
         return jdbcTemplate.queryForObject(sql, flightWithDetailsRowMapper, flightId);
     }
-    
-    // UPDATE
+
     public int update(Flight flight) {
         String sql = "UPDATE flights SET origin_airport_id = ?, destination_airport_id = ?, " +
                     "departure_time = ?, arrival_time = ?, status = ?, airline_id = ?, " +
@@ -125,50 +121,42 @@ public class FlightRepository {
             flight.getFlightId()
         );
     }
-    
-    // DELETE
+
     public int delete(Long flightId) {
         String sql = "DELETE FROM flights WHERE flight_id = ?";
         return jdbcTemplate.update(sql, flightId);
     }
-    
-    // FIND BY STATUS
+
     public List<Flight> findByStatus(String status) {
         String sql = "SELECT * FROM flights WHERE status = ?";
         return jdbcTemplate.query(sql, flightRowMapper, status);
     }
-    
-    // FIND BY AIRLINE
+
     public List<Flight> findByAirline(Long airlineId) {
         String sql = "SELECT * FROM flights WHERE airline_id = ?";
         return jdbcTemplate.query(sql, flightRowMapper, airlineId);
     }
-    
-    // FIND BY ROUTE
+
     public List<Flight> findByRoute(Long originAirportId, Long destinationAirportId) {
         String sql = "SELECT * FROM flights WHERE origin_airport_id = ? AND destination_airport_id = ?";
         return jdbcTemplate.query(sql, flightRowMapper, originAirportId, destinationAirportId);
     }
-    
-    // FIND BY DEPARTURE TIME RANGE
+
     public List<Flight> findByDepartureTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         String sql = "SELECT * FROM flights WHERE departure_time BETWEEN ? AND ?";
         return jdbcTemplate.query(sql, flightRowMapper, startTime, endTime);
     }
-    
-    // FIND FLIGHTS DEPARTING TODAY
+
     public List<Flight> findFlightsDepartingToday() {
         String sql = "SELECT * FROM flights WHERE DATE(departure_time) = CURDATE()";
         return jdbcTemplate.query(sql, flightRowMapper);
     }
-    
-    // UPDATE FLIGHT STATUS
+
     public int updateStatus(Long flightId, String status) {
         String sql = "UPDATE flights SET status = ? WHERE flight_id = ?";
         return jdbcTemplate.update(sql, status, flightId);
     }
-    
-    // FIND DELAYED FLIGHTS
+
     public List<Flight> findDelayedFlights() {
         String sql = "SELECT * FROM flights WHERE status = 'DELAYED'";
         return jdbcTemplate.query(sql, flightRowMapper);

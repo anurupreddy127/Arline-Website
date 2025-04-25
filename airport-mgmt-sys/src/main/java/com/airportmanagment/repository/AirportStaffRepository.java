@@ -42,22 +42,19 @@ public class AirportStaffRepository {
             return staff;
         }
     };
-    
-    // CREATE
+
     public int create(AirportStaff staff) {
         String sql = "INSERT INTO airport_staff (name, role, terminal_id) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, staff.getName(), staff.getRole(), staff.getTerminalId());
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<AirportStaff> findAllWithDetails() {
         String sql = "SELECT s.*, t.name as terminal_name " +
                     "FROM airport_staff s " +
                     "LEFT JOIN terminals t ON s.terminal_id = t.terminal_id";
         return jdbcTemplate.query(sql, staffWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public AirportStaff findByIdWithDetails(Long staffId) {
         String sql = "SELECT s.*, t.name as terminal_name " +
                     "FROM airport_staff s " +
@@ -65,27 +62,22 @@ public class AirportStaffRepository {
                     "WHERE s.staff_id = ?";
         return jdbcTemplate.queryForObject(sql, staffWithDetailsRowMapper, staffId);
     }
-    
-    // UPDATE
+
     public int update(AirportStaff staff) {
         String sql = "UPDATE airport_staff SET name = ?, role = ?, terminal_id = ? WHERE staff_id = ?";
-        return jdbcTemplate.update(sql, staff.getName(), staff.getRole(), 
-                                 staff.getTerminalId(), staff.getStaffId());
+        return jdbcTemplate.update(sql, staff.getName(), staff.getRole(), staff.getTerminalId(), staff.getStaffId());
     }
     
-    // DELETE
     public int delete(Long staffId) {
         String sql = "DELETE FROM airport_staff WHERE staff_id = ?";
         return jdbcTemplate.update(sql, staffId);
     }
-    
-    // FIND BY TERMINAL
+
     public List<AirportStaff> findByTerminal(Long terminalId) {
         String sql = "SELECT * FROM airport_staff WHERE terminal_id = ?";
         return jdbcTemplate.query(sql, staffRowMapper, terminalId);
     }
-    
-    // FIND BY ROLE
+
     public List<AirportStaff> findByRole(String role) {
         String sql = "SELECT * FROM airport_staff WHERE role = ?";
         return jdbcTemplate.query(sql, staffRowMapper, role);

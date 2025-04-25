@@ -28,38 +28,32 @@ public class TicketClassRepository {
             return ticketClass;
         }
     };
-    
-    // CREATE
+
     public int create(TicketClass ticketClass) {
         String sql = "INSERT INTO ticket_classes (name, benefits) VALUES (?, ?)";
         return jdbcTemplate.update(sql, ticketClass.getName(), ticketClass.getBenefits());
     }
-    
-    // READ ALL
+
     public List<TicketClass> findAll() {
         String sql = "SELECT * FROM ticket_classes";
         return jdbcTemplate.query(sql, ticketClassRowMapper);
     }
-    
-    // READ BY ID
+
     public TicketClass findById(Long classId) {
         String sql = "SELECT * FROM ticket_classes WHERE class_id = ?";
         return jdbcTemplate.queryForObject(sql, ticketClassRowMapper, classId);
     }
-    
-    // READ BY NAME
+
     public TicketClass findByName(String name) {
         String sql = "SELECT * FROM ticket_classes WHERE name = ?";
         return jdbcTemplate.queryForObject(sql, ticketClassRowMapper, name);
     }
-    
-    // UPDATE
+
     public int update(TicketClass ticketClass) {
         String sql = "UPDATE ticket_classes SET name = ?, benefits = ? WHERE class_id = ?";
         return jdbcTemplate.update(sql, ticketClass.getName(), ticketClass.getBenefits(), ticketClass.getClassId());
     }
-    
-    // DELETE
+
     public int delete(Long classId) {
         String sql = "DELETE FROM ticket_classes WHERE class_id = ?";
         return jdbcTemplate.update(sql, classId);

@@ -7,7 +7,6 @@ public class TSA {
     private Integer checkpointNumber;
     private Long terminalId;
     
-    // For joined data
     private String terminalName;
     
     public TSA() {

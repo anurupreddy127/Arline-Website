@@ -42,22 +42,19 @@ public class LoungeRepository {
             return lounge;
         }
     };
-    
-    // CREATE
+
     public int create(Lounge lounge) {
         String sql = "INSERT INTO lounges (location, loyalty_id, terminal_id) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, lounge.getLocation(), lounge.getLoyaltyId(), lounge.getTerminalId());
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<Lounge> findAllWithDetails() {
         String sql = "SELECT l.*, t.name as terminal_name " +
                     "FROM lounges l " +
                     "LEFT JOIN terminals t ON l.terminal_id = t.terminal_id";
         return jdbcTemplate.query(sql, loungeWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public Lounge findByIdWithDetails(Long loungeId) {
         String sql = "SELECT l.*, t.name as terminal_name " +
                     "FROM lounges l " +
@@ -65,27 +62,23 @@ public class LoungeRepository {
                     "WHERE l.lounge_id = ?";
         return jdbcTemplate.queryForObject(sql, loungeWithDetailsRowMapper, loungeId);
     }
-    
-    // UPDATE
+
     public int update(Lounge lounge) {
         String sql = "UPDATE lounges SET location = ?, loyalty_id = ?, terminal_id = ? WHERE lounge_id = ?";
         return jdbcTemplate.update(sql, lounge.getLocation(), lounge.getLoyaltyId(), 
                                  lounge.getTerminalId(), lounge.getLoungeId());
     }
-    
-    // DELETE
+
     public int delete(Long loungeId) {
         String sql = "DELETE FROM lounges WHERE lounge_id = ?";
         return jdbcTemplate.update(sql, loungeId);
     }
-    
-    // FIND BY TERMINAL
+
     public List<Lounge> findByTerminal(Long terminalId) {
         String sql = "SELECT * FROM lounges WHERE terminal_id = ?";
         return jdbcTemplate.query(sql, loungeRowMapper, terminalId);
     }
-    
-    // FIND BY LOYALTY ID
+
     public List<Lounge> findByLoyaltyId(String loyaltyId) {
         String sql = "SELECT * FROM lounges WHERE loyalty_id = ?";
         return jdbcTemplate.query(sql, loungeRowMapper, loyaltyId);

@@ -7,7 +7,6 @@ public class Baggage {
     private Long passengerId;
     private Long flightId;
     
-    // For joined data
     private String passengerName;
     private String flightDetails;
     
