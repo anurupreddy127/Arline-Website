@@ -41,7 +41,12 @@ const Navbar = () => {
                   >Passengers</NavLink
                 >
                 <NavLink
-                  to="/crewTSA"
+                  to="/crew"
+                  className={linkclass}
+                  >Crew/TSA</NavLink
+                >
+                <NavLink
+                  to="/tsa"
                   className={linkclass}
                   >Crew/TSA</NavLink
                 >
