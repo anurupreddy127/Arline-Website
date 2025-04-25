@@ -12,7 +12,6 @@ public class Flight {
     private Long airlineId;
     private Long aircraftId;
     
-    // Additional fields for joined data
     private String originAirportName;
     private String originAirportCode;
     private String destinationAirportName;

@@ -28,38 +28,32 @@ public class TerminalRepository {
             return terminal;
         }
     };
-    
-    // CREATE
+
     public int create(Terminal terminal) {
         String sql = "INSERT INTO terminals (name, location) VALUES (?, ?)";
         return jdbcTemplate.update(sql, terminal.getName(), terminal.getLocation());
     }
-    
-    // READ ALL
+
     public List<Terminal> findAll() {
         String sql = "SELECT * FROM terminals";
         return jdbcTemplate.query(sql, terminalRowMapper);
     }
-    
-    // READ BY ID
+
     public Terminal findById(Long terminalId) {
         String sql = "SELECT * FROM terminals WHERE terminal_id = ?";
         return jdbcTemplate.queryForObject(sql, terminalRowMapper, terminalId);
     }
-    
-    // UPDATE
+
     public int update(Terminal terminal) {
         String sql = "UPDATE terminals SET name = ?, location = ? WHERE terminal_id = ?";
         return jdbcTemplate.update(sql, terminal.getName(), terminal.getLocation(), terminal.getTerminalId());
     }
-    
-    // DELETE
+
     public int delete(Long terminalId) {
         String sql = "DELETE FROM terminals WHERE terminal_id = ?";
         return jdbcTemplate.update(sql, terminalId);
     }
-    
-    // FIND BY NAME
+
     public Terminal findByName(String name) {
         String sql = "SELECT * FROM terminals WHERE name = ?";
         return jdbcTemplate.queryForObject(sql, terminalRowMapper, name);

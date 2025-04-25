@@ -44,23 +44,19 @@ public class TSARepository {
             return tsa;
         }
     };
-    
-    // CREATE
+
     public int create(TSA tsa) {
         String sql = "INSERT INTO tsa (name, clearance_level, checkpoint_number, terminal_id) VALUES (?, ?, ?, ?)";
-        return jdbcTemplate.update(sql, tsa.getName(), tsa.getClearanceLevel(), 
-                                 tsa.getCheckpointNumber(), tsa.getTerminalId());
+        return jdbcTemplate.update(sql, tsa.getName(), tsa.getClearanceLevel(), tsa.getCheckpointNumber(), tsa.getTerminalId());
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<TSA> findAllWithDetails() {
         String sql = "SELECT tsa.*, t.name as terminal_name " +
                     "FROM tsa " +
                     "LEFT JOIN terminals t ON tsa.terminal_id = t.terminal_id";
         return jdbcTemplate.query(sql, tsaWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public TSA findByIdWithDetails(Long personalId) {
         String sql = "SELECT tsa.*, t.name as terminal_name " +
                     "FROM tsa " +
@@ -68,34 +64,28 @@ public class TSARepository {
                     "WHERE tsa.personal_id = ?";
         return jdbcTemplate.queryForObject(sql, tsaWithDetailsRowMapper, personalId);
     }
-    
-    // UPDATE
+
     public int update(TSA tsa) {
         String sql = "UPDATE tsa SET name = ?, clearance_level = ?, checkpoint_number = ?, terminal_id = ? " +
                     "WHERE personal_id = ?";
-        return jdbcTemplate.update(sql, tsa.getName(), tsa.getClearanceLevel(), 
-                                 tsa.getCheckpointNumber(), tsa.getTerminalId(), tsa.getPersonalId());
+        return jdbcTemplate.update(sql, tsa.getName(), tsa.getClearanceLevel(), tsa.getCheckpointNumber(), tsa.getTerminalId(), tsa.getPersonalId());
     }
-    
-    // DELETE
+
     public int delete(Long personalId) {
         String sql = "DELETE FROM tsa WHERE personal_id = ?";
         return jdbcTemplate.update(sql, personalId);
     }
-    
-    // FIND BY TERMINAL
+
     public List<TSA> findByTerminal(Long terminalId) {
         String sql = "SELECT * FROM tsa WHERE terminal_id = ?";
         return jdbcTemplate.query(sql, tsaRowMapper, terminalId);
     }
-    
-    // FIND BY CLEARANCE LEVEL
+
     public List<TSA> findByClearanceLevel(String clearanceLevel) {
         String sql = "SELECT * FROM tsa WHERE clearance_level = ?";
         return jdbcTemplate.query(sql, tsaRowMapper, clearanceLevel);
     }
-    
-    // FIND BY CHECKPOINT
+
     public List<TSA> findByCheckpoint(Integer checkpointNumber) {
         String sql = "SELECT * FROM tsa WHERE checkpoint_number = ?";
         return jdbcTemplate.query(sql, tsaRowMapper, checkpointNumber);

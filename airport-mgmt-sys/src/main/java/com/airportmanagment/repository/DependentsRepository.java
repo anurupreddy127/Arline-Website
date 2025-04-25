@@ -48,14 +48,11 @@ public class DependentsRepository {
         }
     };
     
-    // CREATE
     public int create(Dependents dependent) {
         String sql = "INSERT INTO dependents (name, phone, loyalty_id, passenger_id, ticket_id) VALUES (?, ?, ?, ?, ?)";
-        return jdbcTemplate.update(sql, dependent.getName(), dependent.getPhone(), 
-                                 dependent.getLoyaltyId(), dependent.getPassengerId(), dependent.getTicketId());
+        return jdbcTemplate.update(sql, dependent.getName(), dependent.getPhone(), dependent.getLoyaltyId(), dependent.getPassengerId(), dependent.getTicketId());
     }
-    
-    // READ ALL WITH DETAILS
+
     public List<Dependents> findAllWithDetails() {
         String sql = "SELECT d.*, " +
                     "p.name as passenger_name, " +
@@ -65,8 +62,7 @@ public class DependentsRepository {
                     "LEFT JOIN tickets t ON d.ticket_id = t.ticket_id";
         return jdbcTemplate.query(sql, dependentsWithDetailsRowMapper);
     }
-    
-    // READ BY ID WITH DETAILS
+
     public Dependents findByIdWithDetails(Long dependentId) {
         String sql = "SELECT d.*, " +
                     "p.name as passenger_name, " +
@@ -77,34 +73,27 @@ public class DependentsRepository {
                     "WHERE d.dependent_id = ?";
         return jdbcTemplate.queryForObject(sql, dependentsWithDetailsRowMapper, dependentId);
     }
-    
-    // UPDATE
+
     public int update(Dependents dependent) {
         String sql = "UPDATE dependents SET name = ?, phone = ?, loyalty_id = ?, passenger_id = ?, ticket_id = ? WHERE dependent_id = ?";
-        return jdbcTemplate.update(sql, dependent.getName(), dependent.getPhone(), 
-                                 dependent.getLoyaltyId(), dependent.getPassengerId(), 
-                                 dependent.getTicketId(), dependent.getDependentId());
+        return jdbcTemplate.update(sql, dependent.getName(), dependent.getPhone(), dependent.getLoyaltyId(), dependent.getPassengerId(), dependent.getTicketId(), dependent.getDependentId());
     }
-    
-    // DELETE
+
     public int delete(Long dependentId) {
         String sql = "DELETE FROM dependents WHERE dependent_id = ?";
         return jdbcTemplate.update(sql, dependentId);
     }
-    
-    // FIND BY PASSENGER
+
     public List<Dependents> findByPassenger(Long passengerId) {
         String sql = "SELECT * FROM dependents WHERE passenger_id = ?";
         return jdbcTemplate.query(sql, dependentsRowMapper, passengerId);
     }
-    
-    // FIND BY TICKET
+
     public Dependents findByTicket(Long ticketId) {
         String sql = "SELECT * FROM dependents WHERE ticket_id = ?";
         return jdbcTemplate.queryForObject(sql, dependentsRowMapper, ticketId);
     }
-    
-    // FIND BY LOYALTY ID
+
     public List<Dependents> findByLoyaltyId(String loyaltyId) {
         String sql = "SELECT * FROM dependents WHERE loyalty_id = ?";
         return jdbcTemplate.query(sql, dependentsRowMapper, loyaltyId);

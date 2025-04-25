@@ -7,7 +7,6 @@ public class Aircraft {
     private Integer capacity;
     private Long airlineId;
     
-    // For joined data
     private String airlineName;
     
     public Aircraft() {

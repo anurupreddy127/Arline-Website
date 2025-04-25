@@ -27,38 +27,32 @@ public class AirlineRepository {
             return airline;
         }
     };
-    
-    // CREATE
+
     public int create(Airline airline) {
         String sql = "INSERT INTO airlines (name) VALUES (?)";
         return jdbcTemplate.update(sql, airline.getName());
     }
-    
-    // READ ALL
+
     public List<Airline> findAll() {
         String sql = "SELECT * FROM airlines";
         return jdbcTemplate.query(sql, airlineRowMapper);
     }
-    
-    // READ BY ID
+
     public Airline findById(Long airlineId) {
         String sql = "SELECT * FROM airlines WHERE airline_id = ?";
         return jdbcTemplate.queryForObject(sql, airlineRowMapper, airlineId);
     }
-    
-    // UPDATE
+
     public int update(Airline airline) {
         String sql = "UPDATE airlines SET name = ? WHERE airline_id = ?";
         return jdbcTemplate.update(sql, airline.getName(), airline.getAirlineId());
     }
-    
-    // DELETE
+
     public int delete(Long airlineId) {
         String sql = "DELETE FROM airlines WHERE airline_id = ?";
         return jdbcTemplate.update(sql, airlineId);
     }
-    
-    // FIND BY NAME
+
     public Airline findByName(String name) {
         String sql = "SELECT * FROM airlines WHERE name = ?";
         return jdbcTemplate.queryForObject(sql, airlineRowMapper, name);

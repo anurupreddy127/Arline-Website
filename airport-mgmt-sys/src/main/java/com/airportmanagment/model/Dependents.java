@@ -8,7 +8,6 @@ public class Dependents {
     private Long passengerId;
     private Long ticketId;
     
-    // For joined data
     private String passengerName;
     private String ticketDetails;
     
