@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCrewMembers } from "../api/api";
+import { getCrewMembers } from "../api/crewAPI";
 
 const CrewPage = () => {
   const [crewMembers, setCrewMembers] = useState([]);

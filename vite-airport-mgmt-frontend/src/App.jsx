@@ -10,6 +10,8 @@ import HomePage from "./Pages/HomePage";
 import AirlinerPage from "./Pages/AirlinerPage";
 import PassengerPage from "./Pages/PassengerPage";
 import Login from './Pages/Login';
+import TSAPage from "./Pages/TSAPage";
+import CrewPage from "./Pages/CrewPage"
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,7 +19,9 @@ const router = createBrowserRouter(
       <Route index element={<HomePage />} />
       <Route path="/airline" element={<AirlinerPage />} />
       <Route path="/passenger" element={<PassengerPage />}/>
-      <Route path="/login" element={<Login />}/>
+      <Route path="/tsa" element={<TSAPage />}/>
+      <Route path="/crew" element={<CrewPage />}/>
+      
     </Route>
   )
 );
