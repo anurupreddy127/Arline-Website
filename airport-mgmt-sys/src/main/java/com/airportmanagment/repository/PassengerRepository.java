@@ -26,6 +26,7 @@ public class PassengerRepository {
             passenger.setName(rs.getString("name"));
             passenger.setPhone(rs.getString("phone"));
             passenger.setLoyaltyId(rs.getString("loyalty_id"));
+            passenger.setUserId(rs.getLong("user_id"));
             return passenger;
         }
     };
@@ -34,6 +35,12 @@ public class PassengerRepository {
     public int create(Passenger passenger) {
         String sql = "INSERT INTO passengers (name, phone, loyalty_id) VALUES (?, ?, ?)";
         return jdbcTemplate.update(sql, passenger.getName(), passenger.getPhone(), passenger.getLoyaltyId());
+    }
+
+    // CREATE WITH USER ID
+    public int createWithUserId(String name, Long userId) {
+        String sql = "INSERT INTO passengers (name, user_id) VALUES (?, ?)";
+        return jdbcTemplate.update(sql, name, userId);
     }
     
     // READ ALL
@@ -46,6 +53,13 @@ public class PassengerRepository {
     public Passenger findById(Long id) {
         String sql = "SELECT * FROM passengers WHERE passenger_id = ?";
         return jdbcTemplate.queryForObject(sql, passengerRowMapper, id);
+    }
+
+    // READ BY USER ID
+    public Passenger findByUserId(Long userId) {
+        String sql = "SELECT * FROM passengers WHERE user_id = ?";
+        List<Passenger> passengers = jdbcTemplate.query(sql, passengerRowMapper, userId);
+        return passengers.isEmpty() ? null : passengers.get(0);
     }
     
     // UPDATE

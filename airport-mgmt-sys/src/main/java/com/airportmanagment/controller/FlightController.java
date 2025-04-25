@@ -108,11 +108,34 @@ public class FlightController {
     }
     
     @GetMapping("/route")
-    public ResponseEntity<List<Flight>> getFlightsByRoute(
+    public ResponseEntity<List<Map<String, Object>>> getFlightsByRoute(
             @RequestParam Long originAirportId,
             @RequestParam Long destinationAirportId) {
-        List<Flight> flights = flightService.findByRoute(originAirportId, destinationAirportId);
-        return new ResponseEntity<>(flights, HttpStatus.OK);
+        
+        List<Flight> flights = flightService.findByRouteWithDetails(originAirportId, destinationAirportId);
+    
+        List<Map<String, Object>> flightData = flights.stream().map(flight -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("flightId", flight.getFlightId());
+            map.put("origin", flight.getOriginAirportName());
+            map.put("destination", flight.getDestinationAirportName());
+            map.put("departureTime", flight.getDepartureTime());
+            map.put("arrivalTime", flight.getArrivalTime());
+            map.put("status", flight.getStatus());
+    
+            Map<String, Object> airline = new HashMap<>();
+            airline.put("name", flight.getAirlineName());
+            map.put("airline", airline);
+    
+            Map<String, Object> aircraft = new HashMap<>();
+            aircraft.put("name", flight.getAircraftName());
+            aircraft.put("type", flight.getAircraftType());
+            map.put("aircraft", aircraft);
+    
+            return map;
+        }).collect(Collectors.toList());
+    
+        return new ResponseEntity<>(flightData, HttpStatus.OK);
     }
     
     @GetMapping("/departures/today")

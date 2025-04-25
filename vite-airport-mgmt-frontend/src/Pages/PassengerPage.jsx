@@ -15,6 +15,8 @@ const PassengerPage = () => {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
 
+  const loggedInUsername = localStorage.getItem("loggedInUser");
+
   // Fetch airport list on mount
   useEffect(() => {
     fetch("http://localhost:8080/api/airports")
@@ -25,11 +27,53 @@ const PassengerPage = () => {
 
   // Fetch passengers on mount
   useEffect(() => {
-    fetch("http://localhost:8080/api/passengers")
-      .then((res) => res.json())
-      .then((data) => setPassengers(data))
-      .catch((err) => console.error("Error fetching passengers:", err));
+    const fetchLoggedInPassenger = async () => {
+      try {
+        const username = localStorage.getItem("loggedInUser");
+        if (!username) return;
+
+        // Get user by username
+        const userRes = await fetch(
+          `http://localhost:8080/api/users/username/${username}`
+        );
+        const userData = await userRes.json();
+        const userId = userData.id;
+
+        // Get passenger by userId
+        const passengerRes = await fetch(
+          `http://localhost:8080/api/passengers/user/${userId}`
+        );
+        const passengerData = await passengerRes.json();
+
+        setPassengers([passengerData]); // Only one passenger will be set
+      } catch (err) {
+        console.error("Error fetching logged-in passenger:", err);
+      }
+    };
+
+    fetchLoggedInPassenger();
   }, []);
+
+  const [loggedInPassenger, setLoggedInPassenger] = useState(null);
+
+  useEffect(() => {
+    if (loggedInUsername) {
+      fetch(`http://localhost:8080/api/users/username/${loggedInUsername}`)
+        .then((res) => res.json())
+        .then((userData) => {
+          // Once we have the user ID, fetch the passenger using user_id
+          fetch(`http://localhost:8080/api/passengers/user/${userData.id}`)
+            .then((res) => res.json())
+            .then((passengerData) => {
+              setLoggedInPassenger(passengerData);
+            })
+            .catch((err) =>
+              console.error("Error fetching passenger by user ID:", err)
+            );
+        })
+        .catch((err) => console.error("Error fetching user by username:", err));
+    }
+  }, [loggedInUsername]);
 
   // Reset state when flights are updated
   useEffect(() => {
@@ -76,6 +120,7 @@ const PassengerPage = () => {
     setBookingFlightId(flightId);
     setShowBookingForm(true);
     setBookingSuccess(false);
+    setSelectedPassenger(loggedInPassenger?.passengerId || "");
 
     // Fetch available seats
     fetch(`http://localhost:8080/api/tickets/flight/${flightId}/available`)
@@ -146,35 +191,37 @@ const PassengerPage = () => {
       {availableFlights.length > 0 && (
         <>
           <h3 className="text-xl font-semibold mb-2">Available Flights</h3>
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 text-left">Airline</th>
-              <th className="p-2 text-left">Departure</th>
-              <th className="p-2 text-left">Arrival</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Seats Available</th>
-              <th className="p-2 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {availableFlights.map((flight) => (
-              <tr key={flight.flightId}>
-                <td className="p-2">{flight.airline?.name || "Unknown"}</td>
-                <td className="p-2">{flight.departureTime}</td>
-                <td className="p-2">{flight.arrivalTime}</td>
-                <td className="p-2">{flight.status}</td>
-                <td className="p-2">{flight.availableSeats}</td>
-                <td className="p-2">
-                  <button
-                    onClick={() => handleShowBooking(flight.flightId)}
-                    className="bg-green-600 text-white px-3 py-1 rounded"
-                  >
-                    Book
-                  </button>
-                </td>
+          <table className="min-w-full border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-2 text-left">Airline</th>
+                <th className="p-2 text-left">Departure</th>
+                <th className="p-2 text-left">Arrival</th>
+                <th className="p-2 text-left">Status</th>
+                <th className="p-2 text-left">Seats Available</th>
+                <th className="p-2 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
+            <tbody>
+              {availableFlights.map((flight) => (
+                <tr key={flight.flightId}>
+                  <td className="p-2">{flight.airline?.name || "Unknown"}</td>
+                  <td className="p-2">{flight.departureTime}</td>
+                  <td className="p-2">{flight.arrivalTime}</td>
+                  <td className="p-2">{flight.status}</td>
+                  <td className="p-2">{flight.availableSeats}</td>
+                  <td className="p-2">
+                    <button
+                      onClick={() => handleShowBooking(flight.flightId)}
+                      className="bg-green-600 text-white px-3 py-1 rounded"
+                    >
+                      Book
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </>
       )}
 
@@ -188,11 +235,11 @@ const PassengerPage = () => {
               onChange={(e) => setSelectedPassenger(e.target.value)}
             >
               <option value="">Select Passenger</option>
-              {passengers.map((p) => (
-                <option key={p.passengerId} value={p.passengerId}>
-                  {p.name} ({p.passengerId})
+              {loggedInPassenger && (
+                <option value={loggedInPassenger.passengerId}>
+                  {loggedInPassenger.name}
                 </option>
-              ))}
+              )}
             </select>
 
             <select

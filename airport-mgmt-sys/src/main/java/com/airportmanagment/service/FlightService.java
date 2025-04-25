@@ -21,6 +21,10 @@ public class FlightService {
     public List<Flight> findAllWithDetails() {
         return flightRepository.findAllWithDetails();
     }
+
+    public List<Flight> findByRouteWithDetails(Long originAirportId, Long destinationAirportId) {
+        return flightRepository.findByRouteWithDetails(originAirportId, destinationAirportId);
+    }
     
     public Flight findByIdWithDetails(Long id) {
         return flightRepository.findByIdWithDetails(id);
