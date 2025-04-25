@@ -5,6 +5,7 @@ import Airliners from '../components/Airliners'
 import Airlinerflight from '../components/AirlinerFlight'
 import FlightsAircrafts from '../components/FlightsAircrafts'
 import AirlineAssignments from '../components/AirlineAssignments'
+import EditFlights from '.../components/EditFlights'
 
 
 const AirlinerPage = () => {
