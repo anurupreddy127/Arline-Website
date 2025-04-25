@@ -18,7 +18,7 @@ function Login(){
             id: len,
             username: user.toString(),
             password: pwd.toString(),
-            role: 'PASSENGER',
+            role: 'AIRLINE',
         };
         const options = {
             method: 'POST',
