@@ -28,7 +28,7 @@ const FlightsAircrafts = () => {
 
   
   const fetchAircrafts = () => {
-    axios.get('http://localhost:8080/api/aircrafts')
+    axios.get('http://localhost:8080/api/aircraft')
       .then(response => {
         setAircrafts(response.data || []);
       })
