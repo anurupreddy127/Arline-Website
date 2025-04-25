@@ -7,12 +7,13 @@ function Login(){
     const [pwd, setPwd] = useState('');
 
     const login_handler = ()=>{
+        fetch('http://localhost:8080/api/users').then(data=>data.json()).then(data=>console.log(data));
         fetch('http://localhost:8080/api/users/username/'+user).then(response=>response.json()).then((data)=>{if(data.password===pwd){authentication.auth=data.role;alert("Login Successful")}else{alert('Login Failed');}});
     }
 
     const add_user_handler = ()=>{
         let len = 0;
-        fetch('http://localhost:8080/api/users').then((data)=>data.json()).then(data=>{len=data.length+10})
+        fetch('http://localhost:8080/api/users').then((data)=>data.json()).then(data=>{len=data.length+1})
         const postData = {
             id: len,
             username: user.toString(),
