@@ -5,9 +5,12 @@ import com.airportmanagment.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -82,15 +85,29 @@ public ResponseEntity<List<Ticket>> getTicketsByPassengerWithDetails(@PathVariab
         List<Ticket> tickets = ticketService.findAvailableByFlight(flightId);
         return new ResponseEntity<>(tickets, HttpStatus.OK);
     }
+
+    @PutMapping("/{ticketId}/price")
+public ResponseEntity<String> updateTicketPrice(
+    @PathVariable Long ticketId,
+    @RequestParam BigDecimal newPrice) {
+    
+    int result = ticketService.updateTicketPrice(ticketId, newPrice);
+    if (result > 0) {
+        return new ResponseEntity<>("Ticket price updated successfully", HttpStatus.OK);
+    }
+    return new ResponseEntity<>("Failed to update ticket price", HttpStatus.BAD_REQUEST);
+}
     
     @PostMapping("/{ticketId}/book")
-    public ResponseEntity<String> bookTicket(
-            @PathVariable Long ticketId,
-            @RequestParam Long passengerId) {
-        int result = ticketService.bookTicket(ticketId, passengerId);
-        if (result > 0) {
-            return new ResponseEntity<>("Ticket booked successfully", HttpStatus.OK);
-        }
-        return new ResponseEntity<>("Failed to book ticket", HttpStatus.BAD_REQUEST);
+public ResponseEntity<String> bookTicket(
+    @PathVariable Long ticketId,
+    @RequestParam Long passengerId,
+    @RequestParam Long classId) {
+
+    int result = ticketService.bookTicket(ticketId, passengerId, classId);
+    if (result > 0) {
+        return new ResponseEntity<>("Ticket booked successfully", HttpStatus.OK);
     }
+    return new ResponseEntity<>("Failed to book ticket", HttpStatus.BAD_REQUEST);
+}
 }

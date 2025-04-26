@@ -5,6 +5,7 @@ import com.airportmanagment.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -44,12 +45,16 @@ public class TicketService {
     public List<Ticket> findByFlight(Long flightId) {
         return ticketRepository.findByFlight(flightId);
     }
+
+    public int updateTicketPrice(Long ticketId, BigDecimal newPrice) {
+    return ticketRepository.updateTicketPrice(ticketId, newPrice);
+}
     
     public List<Ticket> findAvailableByFlight(Long flightId) {
         return ticketRepository.findAvailableByFlight(flightId);
     }
     
-    public int bookTicket(Long ticketId, Long passengerId) {
-        return ticketRepository.bookTicket(ticketId, passengerId);
+    public int bookTicket(Long ticketId, Long passengerId, Long classId) {
+        return ticketRepository.bookTicket(ticketId, passengerId, classId);
     }
 }

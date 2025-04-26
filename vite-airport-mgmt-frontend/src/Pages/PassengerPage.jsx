@@ -8,13 +8,24 @@ const PassengerPage = () => {
   const [availableFlights, setAvailableFlights] = useState([]);
   const [bookingFlightId, setBookingFlightId] = useState(null);
   const [selectedFlight, setSelectedFlight] = useState(null);
-  const [bookedTrips, setBookedTrips] = useState([]);
+  const [loggedInPassengerTickets, setLoggedInPassengerTickets] = useState([]);
   const [passengers, setPassengers] = useState([]);
   const [seats, setSeats] = useState([]);
   const [selectedPassenger, setSelectedPassenger] = useState("");
   const [selectedSeat, setSelectedSeat] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [ticketClasses, setTicketClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [availableLounges, setAvailableLounges] = useState([]);
+  const [dependents, setDependents] = useState([]);
+  const [selectedTicketBaggage, setSelectedTicketBaggage] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showNewDependentForm, setShowNewDependentForm] = useState(false);
+  const [newDependentData, setNewDependentData] = useState({
+    name: "",
+    phone: "",
+  });
 
   const loggedInUsername = localStorage.getItem("loggedInUser");
 
@@ -24,6 +35,13 @@ const PassengerPage = () => {
       .then((res) => res.json())
       .then((data) => setAirports(data))
       .catch((err) => console.error("Error fetching airports:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/lounges")
+      .then((res) => res.json())
+      .then((data) => setAvailableLounges(data))
+      .catch((err) => console.error("Error fetching lounges:", err));
   }, []);
 
   // Fetch passengers on mount
@@ -40,13 +58,23 @@ const PassengerPage = () => {
               setLoggedInPassenger(passengerData); // Store full passenger
               setPassengers([passengerData]); // Populate dropdown if needed
 
+              // Step 2: Fetch dependents of this passenger
+              fetch(
+                `http://localhost:8080/api/dependents/passenger/${passengerData.passengerId}`
+              )
+                .then((res) => res.json())
+                .then((dependentData) => setDependents(dependentData))
+                .catch((err) =>
+                  console.error("Error fetching dependents:", err)
+                );
+
               // Fetch booked tickets for this passenger
               if (passengerData?.passengerId) {
                 fetch(
-                  `http://localhost:8080/api/tickets/passenger/${passengerData.passengerId}`
+                  `http://localhost:8080/api/tickets/passenger/${passengerData.passengerId}/detailed`
                 )
                   .then((res) => res.json())
-                  .then((tickets) => setBookedTrips(tickets))
+                  .then((tickets) => setLoggedInPassengerTickets(tickets))
                   .catch((err) =>
                     console.error("Error fetching booked trips:", err)
                   );
@@ -59,6 +87,13 @@ const PassengerPage = () => {
         .catch((err) => console.error("Error fetching user by username:", err));
     }
   }, [loggedInUsername]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/ticket-classes")
+      .then((res) => res.json())
+      .then((data) => setTicketClasses(data))
+      .catch((err) => console.error("Error fetching ticket classes:", err));
+  }, []);
 
   // Reset state when flights are updated
   useEffect(() => {
@@ -117,8 +152,39 @@ const PassengerPage = () => {
       .catch((err) => console.error("Error fetching seats:", err));
   };
 
+  const handleClassChange = (e) => {
+    const classId = e.target.value;
+    setSelectedClassId(classId);
+
+    // Determine price based on class
+    let newPrice = 500; // Default for Economy
+    const selectedClass = ticketClasses.find(
+      (c) => c.classId.toString() === classId.toString()
+    );
+    if (selectedClass) {
+      if (selectedClass.name.toLowerCase() === "business") {
+        newPrice = 800;
+      } else if (selectedClass.name.toLowerCase() === "first class") {
+        newPrice = 1500;
+      }
+    }
+
+    // Update seat prices locally
+    const updatedSeats = seats.map((seat) => ({
+      ...seat,
+      price: newPrice,
+    }));
+
+    setSeats(updatedSeats);
+  };
+
   const handleBookTicket = async () => {
-    if (!selectedPassenger || !selectedSeat || !loggedInPassenger?.phone) {
+    if (
+      !selectedPassenger ||
+      !selectedSeat ||
+      !selectedClassId ||
+      !loggedInPassenger?.phone
+    ) {
       alert("Please fill all required fields.");
       return;
     }
@@ -133,13 +199,41 @@ const PassengerPage = () => {
         body: JSON.stringify({
           name: loggedInPassenger.name,
           phone: loggedInPassenger.phone,
-          loyaltyId: loggedInPassenger.loyaltyId || null, // handle empty loyalty ID
+          loyaltyId: loggedInPassenger.loyaltyId || null,
         }),
       });
 
-      // Step 2: Book the ticket
+      // Step 2: Set price based on class selection
+      let priceToUpdate = 500; // Default for Economy
+
+      if (selectedClassId) {
+        const selectedClass = ticketClasses.find(
+          (c) => c.classId.toString() === selectedClassId.toString()
+        );
+
+        if (selectedClass) {
+          if (selectedClass.name.toLowerCase() === "business") {
+            priceToUpdate = 800;
+          } else if (selectedClass.name.toLowerCase() === "first class") {
+            priceToUpdate = 1500;
+          }
+        }
+      }
+
+      console.log("Selected Seat ID for price update:", selectedSeat);
+      console.log("New Price:", priceToUpdate);
+
+      // Step 3: Update ticket price in backend
+      await fetch(
+        `http://localhost:8080/api/tickets/${selectedSeat}/price?newPrice=${priceToUpdate}`,
+        {
+          method: "PUT",
+        }
+      );
+
+      // Step 4: Book the ticket with passengerId and classId
       const res = await fetch(
-        `http://localhost:8080/api/tickets/${selectedSeat}/book?passengerId=${selectedPassenger}`,
+        `http://localhost:8080/api/tickets/${selectedSeat}/book?passengerId=${selectedPassenger}&classId=${selectedClassId}`,
         {
           method: "POST",
         }
@@ -149,11 +243,68 @@ const PassengerPage = () => {
         setBookingSuccess(true);
         setSelectedPassenger("");
         setSelectedSeat("");
+        setSelectedClassId("");
+
+        // Fetch updated trips
+        if (loggedInPassenger?.passengerId) {
+          fetch(
+            `http://localhost:8080/api/tickets/passenger/${loggedInPassenger.passengerId}/detailed`
+          )
+            .then((res) => res.json())
+            .then((tickets) => setLoggedInPassengerTickets(tickets))
+            .catch((err) =>
+              console.error("Error fetching updated trips:", err)
+            );
+        }
       } else {
         alert("Failed to book ticket.");
       }
     } catch (err) {
       console.error("Booking error:", err);
+      alert("Something went wrong!");
+    }
+  };
+
+  const handleAddDependent = async () => {
+    if (!newDependentData.name) {
+      alert("Please enter the dependent's name.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8080/api/dependents", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newDependentData.name,
+          phone: newDependentData.phone || null,
+          passengerId: loggedInPassenger?.passengerId,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Dependent added successfully!");
+
+        // Step 1: Clear the form
+        setNewDependentData({ name: "", phone: "" });
+        setShowNewDependentForm(false);
+
+        // Step 2: Re-fetch the dependents list to update dropdown
+        fetch(
+          `http://localhost:8080/api/dependents/passenger/${loggedInPassenger.passengerId}`
+        )
+          .then((res) => res.json())
+          .then((data) => setDependents(data))
+          .catch((err) =>
+            console.error("Error fetching updated dependents:", err)
+          );
+      } else {
+        alert("Failed to add dependent.");
+      }
+    } catch (err) {
+      console.error("Error adding dependent:", err);
       alert("Something went wrong!");
     }
   };
@@ -206,34 +357,6 @@ const PassengerPage = () => {
         </div>
       </div>
 
-      {bookedTrips.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">
-          <h3 className="text-3xl font-semibold mb-4 text-center">
-            Your Trips
-          </h3>
-          <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-            <thead>
-              <tr className="bg-gray-100 text-center">
-                <th className="p-3">Flight</th>
-                <th className="p-3">Seat</th>
-                <th className="p-3">Class</th>
-                <th className="p-3">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookedTrips.map((trip) => (
-                <tr key={trip.ticketId} className="border-t text-center">
-                  <td className="p-3">{trip.flightDetails}</td>
-                  <td className="p-3">{trip.seat}</td>
-                  <td className="p-3">{trip.className}</td>
-                  <td className="p-3">${trip.price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {availableFlights.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">
           <h3 className="text-4xl font-semibold mb-4 text-center">
@@ -285,21 +408,78 @@ const PassengerPage = () => {
           </h3>
 
           <div className="space-y-6">
+            {/* Passenger Selection */}
             <div>
               <label className="block mb-1 font-medium">Passenger:</label>
               <select
                 className="p-2 border border-gray-400 w-full rounded"
                 value={selectedPassenger}
-                disabled
+                onChange={(e) => {
+                  setSelectedPassenger(e.target.value);
+                  if (e.target.value === "new-dependent") {
+                    setShowNewDependentForm(true);
+                  } else {
+                    setShowNewDependentForm(false);
+                  }
+                }}
               >
                 {loggedInPassenger && (
                   <option value={loggedInPassenger.passengerId}>
-                    {loggedInPassenger.name}
+                    {loggedInPassenger.name} (You)
                   </option>
                 )}
+                {dependents.map((dep) => (
+                  <option key={dep.dependentId} value={dep.passengerId}>
+                    {dep.name} (Dependent)
+                  </option>
+                ))}
+                <option value="new-dependent">+ Add New Dependent</option>
               </select>
             </div>
 
+            {/* New Dependent Form */}
+            {showNewDependentForm && (
+              <div className="mt-4 p-4 bg-gray-100 rounded shadow">
+                <h4 className="text-lg font-semibold mb-2">
+                  Add New Dependent
+                </h4>
+
+                <input
+                  type="text"
+                  placeholder="Dependent Name"
+                  className="p-2 border border-gray-400 w-full mb-3 rounded"
+                  value={newDependentData.name}
+                  onChange={(e) =>
+                    setNewDependentData({
+                      ...newDependentData,
+                      name: e.target.value,
+                    })
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="Phone Number (optional)"
+                  className="p-2 border border-gray-400 w-full mb-3 rounded"
+                  value={newDependentData.phone}
+                  onChange={(e) =>
+                    setNewDependentData({
+                      ...newDependentData,
+                      phone: e.target.value,
+                    })
+                  }
+                />
+
+                <button
+                  onClick={handleAddDependent}
+                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                  Save Dependent
+                </button>
+              </div>
+            )}
+
+            {/* Phone Number */}
             <div>
               <label className="block mb-1 font-medium">Phone Number:</label>
               <input
@@ -316,6 +496,7 @@ const PassengerPage = () => {
               />
             </div>
 
+            {/* Loyalty ID */}
             <div>
               <label className="block mb-1 font-medium">
                 Loyalty ID (optional):
@@ -334,6 +515,24 @@ const PassengerPage = () => {
               />
             </div>
 
+            {/* Class Selection */}
+            <div>
+              <label className="block mb-1 font-medium">Select Class:</label>
+              <select
+                className="p-2 border border-gray-400 w-full rounded"
+                value={selectedClassId}
+                onChange={handleClassChange}
+              >
+                <option value="">Select Class</option>
+                {ticketClasses.map((cls) => (
+                  <option key={cls.classId} value={cls.classId}>
+                    {cls.name} - {cls.benefits}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Seat Selection */}
             <div>
               <label className="block mb-1 font-medium">Select Seat:</label>
               <select
@@ -350,6 +549,7 @@ const PassengerPage = () => {
               </select>
             </div>
 
+            {/* Confirm Button */}
             <button
               onClick={handleBookTicket}
               className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded shadow"
@@ -357,10 +557,113 @@ const PassengerPage = () => {
               Confirm Booking
             </button>
 
+            {/* Success Message */}
             {bookingSuccess && (
               <p className="text-green-600 font-semibold text-center">
                 Ticket booked successfully!
               </p>
+            )}
+          </div>
+        </div>
+      )}
+      {loggedInPassengerTickets.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 py-8 bg-white bg-opacity-90 rounded-lg shadow-md mt-10">
+          <h3 className="text-4xl font-semibold mb-4 text-center">
+            Your Trips
+          </h3>
+          <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-100 text-center">
+                <th className="p-3 w-1/4">Flight</th>
+                <th className="p-3 w-1/4">Seat</th>
+                <th className="p-3 w-1/4">Class</th>
+                <th className="p-3 w-1/4">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loggedInPassengerTickets.map((ticket) => (
+                <tr
+                  key={ticket.ticketId}
+                  className="border-t text-center cursor-pointer hover:bg-gray-100 transition"
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    fetch(
+                      `http://localhost:8080/api/baggage/passenger/${ticket.passengerId}?flightId=${ticket.flightId}`
+                    )
+                      .then((res) => res.json())
+                      .then((data) => setSelectedTicketBaggage(data))
+                      .catch((err) =>
+                        console.error("Error fetching baggage info:", err)
+                      );
+                  }}
+                >
+                  <td className="p-3 w-1/4">
+                    {ticket.flightDetails || "Unknown"}
+                  </td>
+                  <td className="p-3 w-1/4">{ticket.seat}</td>
+                  <td className="p-3 w-1/4">{ticket.className || "N/A"}</td>
+                  <td className="p-3 w-1/4">${ticket.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {selectedTicket && (
+        <div className="mt-10 max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 border border-gray-300">
+          <h3 className="text-2xl font-semibold mb-6 text-center">
+            Your Ticket
+          </h3>
+          <div className="grid grid-cols-2 gap-6 text-sm sm:text-base">
+            <div>
+              <strong>Name:</strong> {loggedInPassenger?.name}
+            </div>
+            <div>
+              <strong>Flight:</strong> {selectedTicket.flightDetails}
+            </div>
+            <div>
+              <strong>Seat:</strong> {selectedTicket.seat}
+            </div>
+            <div>
+              <strong>Class:</strong> {selectedTicket.className}
+            </div>
+            <div>
+              <strong>Price:</strong> ${selectedTicket.price}
+            </div>
+            <div>
+              <strong>Loyalty ID:</strong>{" "}
+              {loggedInPassenger?.loyaltyId || "Not Provided"}
+            </div>
+
+            <div className="col-span-2">
+              <strong>Lounges:</strong>{" "}
+              {availableLounges
+                .filter(
+                  (lounge) => lounge.loyaltyId === loggedInPassenger?.loyaltyId
+                )
+                .map((lounge) => lounge.location)
+                .join(", ") || "No Access"}
+            </div>
+
+            <div className="col-span-2">
+              <strong>Baggage Info:</strong>{" "}
+              {selectedTicket.className?.toLowerCase().includes("business") ||
+              selectedTicket.className?.toLowerCase().includes("first")
+                ? "2 carry-on bags allowed"
+                : "1 carry-on bag allowed"}
+            </div>
+
+            {selectedTicketBaggage.length > 0 && (
+              <div className="col-span-2">
+                <strong>Baggage Tracking:</strong>
+                <ul className="list-disc ml-6 mt-2">
+                  {selectedTicketBaggage.map((bag) => (
+                    <li key={bag.baggageId}>
+                      {bag.status} at {bag.location}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>
