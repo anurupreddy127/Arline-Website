@@ -32,6 +32,10 @@ public class BaggageService {
     public int delete(Long id) {
         return baggageRepository.delete(id);
     }
+
+    public List<Baggage> findByPassengerAndFlight(Long passengerId, Long flightId) {
+        return baggageRepository.findByPassengerAndFlight(passengerId, flightId);
+    }
     
     public List<Baggage> findByPassenger(Long passengerId) {
         return baggageRepository.findByPassenger(passengerId);

@@ -65,6 +65,14 @@ public class BaggageController {
         List<Baggage> baggageList = baggageService.findByPassenger(passengerId);
         return new ResponseEntity<>(baggageList, HttpStatus.OK);
     }
+
+    @GetMapping("/passenger/{passengerId}/flight/{flightId}")
+public ResponseEntity<List<Baggage>> getBaggageByPassengerAndFlight(
+        @PathVariable Long passengerId,
+        @PathVariable Long flightId) {
+    List<Baggage> baggageList = baggageService.findByPassengerAndFlight(passengerId, flightId);
+    return new ResponseEntity<>(baggageList, HttpStatus.OK);
+}
     
     @GetMapping("/flight/{flightId}")
     public ResponseEntity<List<Baggage>> getBaggageByFlight(@PathVariable Long flightId) {

@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -146,13 +147,18 @@ public class TicketRepository {
         return jdbcTemplate.query(sql, ticketRowMapper, flightId);
     }
 
+    public int updateTicketPrice(Long ticketId, BigDecimal newPrice) {
+    String sql = "UPDATE tickets SET price = ? WHERE ticket_id = ?";
+    return jdbcTemplate.update(sql, newPrice, ticketId);
+}
+
     public List<Ticket> findAvailableByFlight(Long flightId) {
         String sql = "SELECT * FROM tickets WHERE flight_id = ? AND booked_status = false";
         return jdbcTemplate.query(sql, ticketRowMapper, flightId);
     }
 
-    public int bookTicket(Long ticketId, Long passengerId) {
-        String sql = "UPDATE tickets SET booked_status = true, passenger_id = ? WHERE ticket_id = ? AND booked_status = false";
-        return jdbcTemplate.update(sql, passengerId, ticketId);
+    public int bookTicket(Long ticketId, Long passengerId, Long classId) {
+        String sql = "UPDATE tickets SET booked_status = true, passenger_id = ?, class_id = ? WHERE ticket_id = ? AND booked_status = false";
+        return jdbcTemplate.update(sql, passengerId, classId, ticketId);
     }
 }

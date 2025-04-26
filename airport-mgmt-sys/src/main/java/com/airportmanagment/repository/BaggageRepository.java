@@ -46,6 +46,11 @@ public class BaggageRepository {
         }
     };
 
+    public List<Baggage> findByPassengerAndFlight(Long passengerId, Long flightId) {
+        String sql = "SELECT * FROM baggage WHERE passenger_id = ? AND flight_id = ?";
+        return jdbcTemplate.query(sql, baggageRowMapper, passengerId, flightId);
+    }
+
     public int create(Baggage baggage) {
         String sql = "INSERT INTO baggage (location, status, passenger_id, flight_id) VALUES (?, ?, ?, ?)";
         return jdbcTemplate.update(sql, baggage.getLocation(), baggage.getStatus(), baggage.getPassengerId(), baggage.getFlightId());

@@ -15,7 +15,7 @@ public class DependentsController {
     
     @Autowired
     private DependentsService dependentsService;
-    
+     
     @PostMapping
     public ResponseEntity<String> createDependent(@RequestBody Dependents dependent) {
         int result = dependentsService.create(dependent);
